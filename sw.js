@@ -1,11 +1,10 @@
-const CACHE = 'fridge-v1';
+const CACHE = 'fridge-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png',
-  './apple-touch-icon.png'
+  './icon-512.png'
 ];
 
 self.addEventListener('install', e => {
