@@ -1,0 +1,478 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>냉장고</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#E6EDE9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="냉장고">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOmFiMDEzZTRjLTVjNTktNGY0OS05ZDU2LWZlZTkxMjJmZWMxZAAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNoG6PNvYowzrylbWWTv0RpcAAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6ZjNiMWVmNDMtYjI3MS00ZDZlLWFjZWMtYzU0MDZhODE5YmI3bHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaJJc1/eeBvGscx+rkBRrVnMAAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYIBOG6cAqtl4zqntjT/zYaY9NmrG+Agrf2FtbVEQleOLwpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2iXvPcv1NDnlfCiZhgDnLUkAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggZrqfH/zAoiNVFKF4PE3cQz4b7CI3eGMg8cAGvB0AFHlkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYTphYjAxM2U0Yy01YzU5LTRmNDktOWQ1Ni1mZWU5MTIyZmVjMWQvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDo5OWI0ZjZkMS01N2ZlLTQzNWMtOTFmOS1mYmYwOThhZWUyNWFyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggE4bpwCq2XjOqe2NP/Nhpj02asb4CCt/YW1tURCV44vCiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIDdvag9UGRm8wxtWYyu2TFcS4uixNbGD9f4TL8y62VeAomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIKsYwDWipoY+d1F8cHM16Z9Yg/zEVW6YAn8r0PEsoQaudGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2WECanF/oNVBTmDV8E4cTNi2eQsYvJsx1D6VhCMBQWuMeDxYn5ArU56x1mbNGv2KeAku9stSGDleNbtZXBuhEVJP/dEWIdQAAAsZJREFUeJzt3bFNXFEQQNHFcg1EJO4ACZpwL85chzP34iZAoiQHlhCCvYAD74yXcyKIeIyuZlfi8/bi8svVAY75NH0A9hIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZA+Tx/gDQ9399NH+Leub2+mj5Audv7H29k38dLCStbF8QGzeGpVIrvec3zwMg7LJrBlc6wayrgl+2PF5lDGM0sGsiIOXtrQx3wcG6aw0/hkhuMY//2Xm53P/OZgrck4rI33GJySzUESB2ksDq8p7zc1K5uDtP1P9ufn649vj1//+v5z8CRvsjlO6mkZL7/dRhynczSFzX2IgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4jido899bX4YTBwn9SyFzWUcPEN6esuDeMrmIImDJA6SOEjiIG25MI6FbA6SOEjiIImDJA6SOEhjf3hz7dNfGbkN3eYgiYMkDpI4SOIgiYMkDpIHjE/NJbUc55JajnNJLedDHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRxOj4AkNf4AEBeszyIp2wOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0lgc17c3Uz/6vzM1K5uDJA7SZBxeWd5jcEo2B2k4DsvjdbPzmd8c+ijjk5mP47BgCgttmMmKOA47ZrHHkmlsieOwZiLj9sxhURyHTXOZsmoCF5dfrqbPcMTD3f30EU5tVRZ/LI3j0dlXsrCJR9vjYNCu9xysIg6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEjiIImDJA6SOEi/AWjpY0ZdlOzpAAAAAElFTkSuQmCC">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOmQ4OTI2ODU0LTIwYzQtNGFkNi1iZmY3LTgyODA5M2FkYmYzNgAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNoUOn/SEwiJZTdnuTuZKOElgAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6MjQzMjRmZTUtZGY0YS00NGZkLWI2YTktMWM1ZjY0NjU3N2U4bHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaGvEYy3dm9N9qs52yA8B9/UAAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYINOUdM/lyHr7+M3qTMqIGFk6HDv30/Xq90bdhFZuTlV0pGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2i4jpXRQ4K6B0h8HFCBiiyRAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggh1jB/wfg5IYirlrAJinnLUHoEVvJk5zXOefDcdsI8EZkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYTpkODkyNjg1NC0yMGM0LTRhZDYtYmZmNy04MjgwOTNhZGJmMzYvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDoxMjcxMTQ1ZC01ODczLTRkNDctOWE0MS04NzU5ZGZmYzEzMGRyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFgg05R0z+XIevv4zepMyogYWTocO/fT9er3Rt2EVm5OVXSiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIHgs4+3Jl7RqR967m0tyZI55dgn33bgS1+gINqTqEiELomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIJkvxpoi84ugJUCzv+u1FnFJ8iuAEi+eKzGNtB2BDbzKdGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2WEDtaHlCACSXaduhQRUJD8uiFO8eq3+sX2rCUDWL8abi+0vQBVjWtA4hJySYiHtJxwu12f75b9v2eAeQXh5CfET1IGA0CAAAAv9JREFUeJzt3bFNHEEUgOHDcg1EJHSABE24F2euw5l7cRMgUZKDkxA6I2zuD+YN930RZKOnfwdW2t25ur69OcC5vqxeAHsTEImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREMnX1Qv4L8+PT6uXsMDdw/3qJfzb1fB34y8znROTS5obkHROzMxoYkDSece0jMb9E62e902bz6yApk1nplFTGhTQqLkMN2dWUwKaM5FdDJnYlIDY1IiAhlxM25kwtxEBsa/1AU24jPa1fHrrA2JriwNafgF9AmtnaAci2eNxjkvw7ef3l59///i1cCUfYgca4XU9f/86mYDWezOXXRoSEImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYDWe/MJ6F0eixbQCCe57FLPwVsZc2wUzWt2IBIBkQiIREAkAiIREMni2/hpn83ekc+7sDEBkQiIREAkAiJZfBfmI5u7swORCIhEQCQCIhEQiYBIBEQiIBJvZUzhrAzO56wMzuesDC6XgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCGg958ZTOTeeaqNoXrMDkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREsjigu4f7tQv4BNbO0A5EIiCS9QH5K1Ysn976gNjaiICWX0abmjC3EQFxhgn1HOYENGQcfNSUgA4a+og5sxoU0GHSXCYbNaWr69ub1Ws49fz4tHoJQ41K52hiQEcyOjGwnsPkgI5kdJiaztH0gI4uM6PJ3bzYIyDGmnUXxnYERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEj+AGk/bCgIlmDJAAAAAElFTkSuQmCC">
+<style>
+:root{
+  --frost:#E6EDE9;
+  --glass:#FFFFFF;
+  --ink:#16211C;
+  --muted:#6E807A;
+  --line:#CFDCD6;
+  --fresh:#2F7A55;
+  --soon:#B4761A;
+  --gone:#A63A32;
+  --del:#A63A32;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:var(--frost);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+  font-size:16px;line-height:1.45;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom));
+}
+header{
+  padding:calc(20px + env(safe-area-inset-top)) 18px 12px;
+}
+h1{font-size:26px;letter-spacing:-.02em;margin:0 0 2px;font-weight:700}
+.sub{color:var(--muted);font-size:13.5px;margin:0}
+.tabs{display:flex;gap:6px;padding:8px 18px 12px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:0 0 auto;border:1px solid var(--line);background:transparent;color:var(--muted);
+  padding:7px 14px;border-radius:999px;font-size:13.5px;font-family:inherit;cursor:pointer;
+}
+.tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.list{padding:0 12px}
+.row{position:relative;overflow:hidden;border-radius:14px;margin-bottom:8px;background:var(--del)}
+.rowbg{position:absolute;inset:0;display:flex;align-items:center;padding-left:22px;color:#fff;font-size:14.5px;font-weight:600;letter-spacing:.01em}
+.rowfg{
+  position:relative;display:flex;align-items:center;gap:12px;
+  background:var(--glass);padding:11px 14px 11px 0;border-radius:14px;
+  touch-action:pan-y;will-change:transform;
+}
+.bar{width:5px;align-self:stretch;border-radius:14px 0 0 14px;margin-right:9px;flex:0 0 5px}
+.thumb{
+  width:50px;height:50px;border-radius:10px;flex:0 0 50px;object-fit:cover;
+  background:#DFE8E3;display:grid;place-items:center;font-size:22px;
+}
+.meta{flex:1;min-width:0}
+.name{font-size:15.5px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.date{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:1px}
+.dday{text-align:right;flex:0 0 auto;line-height:1}
+.ddn{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.ddl{font-size:10.5px;color:var(--muted);margin-top:3px}
+.empty{text-align:center;color:var(--muted);padding:70px 30px;font-size:14.5px;line-height:1.7}
+.fab{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(22px + env(safe-area-inset-bottom));
+  background:var(--ink);color:#fff;border:0;border-radius:999px;
+  padding:15px 30px;font-size:15.5px;font-weight:600;font-family:inherit;cursor:pointer;
+  box-shadow:0 6px 22px rgba(22,33,28,.28);
+}
+.scrim{position:fixed;inset:0;background:rgba(22,33,28,.42);opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;background:var(--frost);
+  border-radius:20px 20px 0 0;padding:8px 18px calc(20px + env(safe-area-inset-bottom));
+  transform:translateY(102%);transition:transform .26s cubic-bezier(.2,.8,.25,1);
+  max-height:92vh;overflow-y:auto;
+}
+.sheet.on{transform:translateY(0)}
+.grab{width:38px;height:4px;background:var(--line);border-radius:9px;margin:6px auto 14px}
+.field{margin-bottom:16px}
+.lab{font-size:13px;color:var(--muted);margin-bottom:7px}
+input[type=text]{
+  width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;
+  background:var(--glass);font-size:16px;font-family:inherit;color:var(--ink);
+}
+input:focus-visible,button:focus-visible{outline:2px solid var(--fresh);outline-offset:2px}
+#exp{font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  border:1px solid var(--line);background:var(--glass);color:var(--ink);
+  padding:8px 12px;border-radius:11px;font-size:13.5px;font-family:inherit;cursor:pointer;
+}
+.chip[aria-pressed="true"]{background:var(--fresh);border-color:var(--fresh);color:#fff}
+.shots{display:flex;gap:8px;align-items:center}
+.shot{
+  flex:1;min-width:0;border:1px dashed var(--line);background:var(--glass);color:var(--muted);
+  padding:13px;border-radius:12px;font-size:14px;font-family:inherit;cursor:pointer;
+}
+#prev{width:62px;height:62px;border-radius:12px;object-fit:cover;display:none;flex:0 0 62px}
+.save{
+  width:100%;background:var(--ink);color:#fff;border:0;border-radius:13px;
+  padding:16px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;
+}
+.save:disabled{opacity:.35}
+.hint{font-size:12px;color:var(--muted);margin-top:7px}
+.toast{
+  position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(8px);
+  background:var(--ink);color:#fff;padding:11px 17px;border-radius:11px;font-size:14px;
+  opacity:0;pointer-events:none;transition:.22s;white-space:nowrap;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <h1>냉장고</h1>
+  <p class="sub" id="sub">불러오는 중</p>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" data-f="all" aria-selected="true">전체</button>
+  <button class="tab" role="tab" data-f="soon" aria-selected="false">임박</button>
+  <button class="tab" role="tab" data-f="gone" aria-selected="false">지남</button>
+</div>
+
+<div class="list" id="list"></div>
+
+<button class="fab" id="fab">+ 넣기</button>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="식품 넣기">
+  <div class="grab"></div>
+
+  <div class="field">
+    <div class="lab">아이콘</div>
+    <div class="chips" id="icons"></div>
+  </div>
+
+  <div class="field">
+    <div class="lab">사진</div>
+    <div class="shots">
+      <button class="shot" id="bCam">📷 사진 찍기</button>
+      <button class="shot" id="bAlb">🖼 앨범</button>
+      <img id="prev" alt="">
+    </div>
+    <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+    <input type="file" id="fAlb" accept="image/*" hidden>
+    <div class="hint" id="aiStat"></div>
+  </div>
+
+  <div class="field">
+    <div class="lab">이름</div>
+    <input type="text" id="name" placeholder="예: 대파, 삼겹살" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <div class="lab">종류 — 고르면 오늘 기준으로 유통기한이 채워집니다</div>
+    <div class="chips" id="cats"></div>
+  </div>
+
+  <div class="field">
+    <div class="lab">유통기한</div>
+    <input type="text" id="exp" inputmode="numeric" placeholder="20260907" maxlength="10" autocomplete="off">
+    <div class="hint" id="expHint">숫자 8자리로 직접 고쳐도 됩니다</div>
+  </div>
+
+  <button class="save" id="save" disabled>냉장고에 넣기</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS=[
+ {k:'잎채소',e:'🥬',d:5},{k:'뿌리채소',e:'🥕',d:14},{k:'과일',e:'🍎',d:7},
+ {k:'육류',e:'🥩',d:3},{k:'해산물',e:'🐟',d:2},{k:'유제품',e:'🥛',d:7},
+ {k:'계란',e:'🥚',d:21},{k:'두부·콩',e:'🫘',d:5},{k:'반찬',e:'🥘',d:3},
+ {k:'빵',e:'🍞',d:4},{k:'냉동',e:'🧊',d:90},{k:'양념',e:'🧂',d:180},
+ {k:'음료',e:'🧃',d:14},{k:'기타',e:'📦',d:7}
+];
+const KEY='fridge-items';
+let items=[],filter='all',draft={img:null,cat:null,icon:null};
+
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const ymd=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+const plus=n=>{const d=today();d.setDate(d.getDate()+n);return ymd(d)};
+const pretty=s=>s?`${s.slice(0,4)}.${s.slice(4,6)}.${s.slice(6,8)}`:'';
+function left(s){
+  if(!s||s.length!==8)return null;
+  const d=new Date(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8));
+  if(isNaN(d))return null;
+  return Math.round((d-today())/864e5);
+}
+const toneOf=n=>n===null?'--muted':n<0?'--gone':n<=3?'--soon':'--fresh';
+
+/* ---------- 저장 ---------- */
+const HAS_WS = typeof window.storage !== 'undefined';
+async function load(){
+  try{
+    if(HAS_WS){const r=await window.storage.get(KEY);items=r?JSON.parse(r.value):[]}
+    else{items=JSON.parse(localStorage.getItem(KEY)||'[]')}
+  }catch(e){items=[]}
+  render();
+}
+let t=null;
+function save(){
+  clearTimeout(t);
+  t=setTimeout(async()=>{
+    try{
+      const v=JSON.stringify(items);
+      if(HAS_WS)await window.storage.set(KEY,v);
+      else localStorage.setItem(KEY,v);
+    }catch(e){toast('저장 공간이 가득 찼습니다. 오래된 항목을 지워주세요')}
+  },250);
+}
+
+/* ---------- 목록 ---------- */
+function render(){
+  const list=$('list');list.innerHTML='';
+  const all=items.map(i=>({...i,n:left(i.exp)}))
+    .sort((a,b)=>(a.n===null)-(b.n===null)||a.n-b.n);
+  const soon=all.filter(i=>i.n!==null&&i.n>=0&&i.n<=3).length;
+  const gone=all.filter(i=>i.n!==null&&i.n<0).length;
+  $('sub').textContent=all.length
+    ? `${all.length}개 보관 중` + (soon?` · 임박 ${soon}`:'') + (gone?` · 지남 ${gone}`:'')
+    : '아직 비어 있어요';
+
+  const view=all.filter(i=>filter==='all'||(filter==='soon'&&i.n!==null&&i.n>=0&&i.n<=3)||(filter==='gone'&&i.n!==null&&i.n<0));
+  if(!view.length){
+    const p=document.createElement('p');p.className='empty';
+    p.textContent=filter==='all'
+      ? '냉장고가 비었습니다.\n아래 넣기를 눌러 사진을 찍거나 이름을 적어 넣어보세요.'
+      : '해당하는 식품이 없습니다.';
+    p.style.whiteSpace='pre-line';list.appendChild(p);return;
+  }
+  view.forEach(it=>list.appendChild(row(it)));
+}
+
+function row(it){
+  const c=CATS.find(c=>c.k===it.cat)||CATS[13];
+  const tone=`var(${toneOf(it.n)})`;
+  const wrap=document.createElement('div');wrap.className='row';
+
+  const bg=document.createElement('div');bg.className='rowbg';bg.textContent='밀어서 꺼내기';
+  const fg=document.createElement('div');fg.className='rowfg';
+
+  const bar=document.createElement('div');bar.className='bar';bar.style.background=tone;
+
+  let th;
+  if(it.img){th=document.createElement('img');th.className='thumb';th.src=it.img;th.alt=''}
+  else{th=document.createElement('div');th.className='thumb';th.textContent=it.icon||c.e}
+
+  const meta=document.createElement('div');meta.className='meta';
+  const nm=document.createElement('div');nm.className='name';nm.textContent=it.name;
+  const dt=document.createElement('div');dt.className='date';
+  dt.textContent=it.exp?`${c.k} · ${pretty(it.exp)}`:c.k;
+  meta.append(nm,dt);
+
+  const dd=document.createElement('div');dd.className='dday';
+  const n=document.createElement('div');n.className='ddn';n.style.color=tone;
+  const l=document.createElement('div');l.className='ddl';
+  if(it.n===null){n.textContent='—';l.textContent='기한 없음'}
+  else if(it.n<0){n.textContent=`+${-it.n}`;l.textContent='일 지남'}
+  else if(it.n===0){n.textContent='오늘';n.style.fontSize='17px';l.textContent='마지막 날'}
+  else{n.textContent=it.n;l.textContent='일 남음'}
+  dd.append(n,l);
+
+  fg.append(bar,th,meta,dd);wrap.append(bg,fg);
+  swipe(wrap,fg,it.id);
+  return wrap;
+}
+
+/* ---------- 오른쪽으로 밀어서 제거 ---------- */
+function swipe(wrap,fg,id){
+  let x0=0,y0=0,dx=0,on=false,lock=null;
+  fg.addEventListener('pointerdown',e=>{
+    on=true;lock=null;x0=e.clientX;y0=e.clientY;dx=0;
+    fg.style.transition='none';fg.setPointerCapture(e.pointerId);
+  });
+  fg.addEventListener('pointermove',e=>{
+    if(!on)return;
+    const mx=e.clientX-x0,my=e.clientY-y0;
+    if(lock===null){
+      if(Math.abs(mx)<6&&Math.abs(my)<6)return;
+      lock=Math.abs(mx)>Math.abs(my)?'x':'y';
+    }
+    if(lock!=='x')return;
+    dx=Math.max(0,mx);
+    fg.style.transform=`translateX(${dx}px)`;
+  });
+  const end=()=>{
+    if(!on)return;on=false;
+    fg.style.transition='transform .22s ease';
+    if(dx>Math.min(130,wrap.offsetWidth*.42)){
+      fg.style.transform=`translateX(${wrap.offsetWidth}px)`;
+      wrap.style.transition='height .2s ease,margin .2s ease,opacity .2s';
+      wrap.style.height=wrap.offsetHeight+'px';
+      requestAnimationFrame(()=>{wrap.style.height='0px';wrap.style.margin='0';wrap.style.opacity='0'});
+      const it=items.find(i=>i.id===id);
+      setTimeout(()=>{items=items.filter(i=>i.id!==id);save();render()},210);
+      toast(`${it?it.name:'항목'} 꺼냈습니다`);
+    }else fg.style.transform='translateX(0)';
+  };
+  fg.addEventListener('pointerup',end);
+  fg.addEventListener('pointercancel',end);
+}
+
+/* ---------- 입력 시트 ---------- */
+CATS.forEach(c=>{
+  const b=document.createElement('button');
+  b.className='chip';b.type='button';b.setAttribute('aria-pressed','false');
+  b.textContent=`${c.e} ${c.k}`;
+  b.onclick=()=>{
+    draft.cat=c.k;
+    [...$('cats').children].forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    $('exp').value=plus(c.d);
+    if(!draft.icon){
+      const hit=[...$('icons').children].find(x=>x.textContent===c.e);
+      if(hit)hit.click();
+    }
+    $('expHint').textContent=`${c.k} 기준 ${c.d}일 — 숫자로 직접 고쳐도 됩니다`;
+    check();
+  };
+  $('cats').appendChild(b);
+});
+
+function openSheet(){
+  draft={img:null,cat:null,icon:null};
+  $('name').value='';$('exp').value='';$('prev').style.display='none';
+  $('expHint').textContent='숫자 8자리로 직접 고쳐도 됩니다';$('aiStat').textContent='';
+  [...$('cats').children].forEach(x=>x.setAttribute('aria-pressed','false'));
+  [...$('icons').children].forEach(x=>x.setAttribute('aria-pressed','false'));
+  check();$('scrim').classList.add('on');$('sheet').classList.add('on');
+}
+function closeSheet(){$('scrim').classList.remove('on');$('sheet').classList.remove('on')}
+$('fab').onclick=openSheet;$('scrim').onclick=closeSheet;
+
+const ICONS=['🥬','🥕','🧅','🍅','🥦','🌽','🍎','🍌','🍓','🍇','🥩','🍗','🐟','🦐','🥚','🥛','🧀','🧈','🫘','🍚','🥘','🍜','🍞','🧊','🧂','🍶','🧃','☕','🍫','📦'];
+ICONS.forEach(ic=>{
+  const b=document.createElement('button');
+  b.className='chip';b.type='button';b.setAttribute('aria-pressed','false');
+  b.textContent=ic;b.style.fontSize='19px';b.style.padding='6px 9px';
+  b.onclick=()=>{
+    draft.icon=ic;
+    [...$('icons').children].forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+  };
+  $('icons').appendChild(b);
+});
+
+function openPicker(id){
+  const i=$(id);
+  i.value='';
+  try{i.click()}
+  catch(e){toast('사진을 열 수 없습니다. 이름만 적어도 등록됩니다')}
+}
+$('bCam').onclick=()=>openPicker('fCam');
+$('bAlb').onclick=()=>openPicker('fAlb');
+$('fCam').onchange=e=>pick(e.target.files&&e.target.files[0]);
+$('fAlb').onchange=e=>pick(e.target.files&&e.target.files[0]);
+
+function pick(f){
+  if(!f){toast('사진이 선택되지 않았습니다');return}
+  toast('사진 넣는 중');
+  shrink(f).then(url=>{
+    draft.img=url;$('prev').src=url;$('prev').style.display='block';
+    check();recognize(url);
+  }).catch(()=>toast('사진을 읽지 못했습니다. 이름만으로도 등록됩니다'));
+}
+
+/* 원본 → 340px JPEG. 축소가 안 되면 원본 그대로 사용 */
+function shrink(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onerror=()=>rej();
+    r.onload=()=>{
+      const raw=r.result;
+      const im=new Image();
+      im.onerror=()=>res(raw);
+      im.onload=()=>{
+        try{
+          const m=340,s=Math.min(1,m/Math.max(im.width,im.height));
+          const cv=document.createElement('canvas');
+          cv.width=Math.max(1,im.width*s|0);cv.height=Math.max(1,im.height*s|0);
+          cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+          const out=cv.toDataURL('image/jpeg',.62);
+          res(out&&out.length>200?out:raw);
+        }catch(e){res(raw)}
+      };
+      im.src=raw;
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+/* ---------- 사진으로 품목 알아내기 ---------- */
+/* 아래 주소를 본인 워커 주소로 바꾸세요. 비워두면 인식 없이 수동 입력만 됩니다. */
+const WORKER='';
+
+async function recognize(url){
+  const st=$('aiStat');
+  if(!WORKER){st.textContent='';return}
+  st.textContent='사진 보는 중…';
+  try{
+    const r=await fetch(WORKER,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        image:url.split(',')[1],
+        media_type:(url.match(/^data:(image\/[a-z+]+);/)||[])[1]||'image/jpeg'
+      })
+    });
+    const j=await r.json();
+    if(!r.ok||j.error){st.textContent='알아보지 못했습니다. 직접 적어주세요';return}
+    if(!j.name){st.textContent='식품으로 보이지 않습니다. 직접 적어주세요';return}
+
+    if(!$('name').value)$('name').value=j.name;
+    const hitCat=[...$('cats').children].find(x=>x.textContent.includes(j.cat));
+    if(hitCat&&!draft.cat)hitCat.click();
+    if(j.icon){
+      draft.icon=j.icon;
+      [...$('icons').children].forEach(x=>x.setAttribute('aria-pressed','false'));
+      const hitIcon=[...$('icons').children].find(x=>x.textContent===j.icon);
+      if(hitIcon)hitIcon.setAttribute('aria-pressed','true');
+    }
+    if(Number.isInteger(j.days)&&j.days>0)$('exp').value=plus(j.days);
+    check();
+    st.textContent=(j.sure!==undefined&&j.sure<0.6)
+      ? j.name+' 같은데 확실하지 않습니다. 확인해주세요'
+      : j.name+' 으로 채웠습니다. 틀리면 고쳐주세요';
+  }catch(e){
+    st.textContent='인식 서버에 연결하지 못했습니다';
+  }
+}
+
+$('exp').addEventListener('input',e=>{
+  e.target.value=e.target.value.replace(/\D/g,'').slice(0,8);check();
+});
+$('name').addEventListener('input',check);
+function check(){
+  const v=$('exp').value;
+  $('save').disabled=!($('name').value.trim()||draft.img)||!(v===''||v.length===8);
+}
+
+$('save').onclick=()=>{
+  const v=$('exp').value;
+  if(v.length===8&&left(v)===null){toast('날짜를 확인해 주세요');return}
+  items.push({
+    id:Date.now()+''+Math.random().toString(36).slice(2,6),
+    name:$('name').value.trim()||draft.cat||'이름 없는 식품',
+    cat:draft.cat||'기타',
+    exp:v.length===8?v:'',
+    img:draft.img,
+    icon:draft.icon
+  });
+  save();render();closeSheet();toast('넣었습니다');
+};
+
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  filter=b.dataset.f;
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));
+  render();
+});
+
+let tt=null;
+function toast(m){
+  $('toast').textContent=m;$('toast').classList.add('on');
+  clearTimeout(tt);tt=setTimeout(()=>$('toast').classList.remove('on'),1900);
+}
+load();
+
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
