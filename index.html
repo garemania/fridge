@@ -223,6 +223,34 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 .whyrow .toss{color:var(--gone)}
 .whycancel{width:100%;border:0;background:transparent;color:var(--l2);font-size:15px;padding:14px 0 0;cursor:pointer}
 
+/* 수량 선택 (꺼내기) */
+.whyqty{display:flex;align-items:center;justify-content:center;gap:10px;margin:-6px 0 16px;font-size:14px;color:var(--l2)}
+.whyqty[hidden]{display:none}
+.whyqty .stepper{background:var(--card)}
+.whyqty .stepper button{width:44px;padding:8px 0}
+.whyqty a{color:var(--brandD);font-weight:600;text-decoration:none;cursor:pointer}
+
+/* 임박 알림 배너 */
+.alert{display:none;margin:12px 12px 0;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--soon);border-radius:12px;padding:11px 12px 11px 13px;gap:10px;align-items:flex-start}
+.alert.on{display:flex}
+.alert.bad{border-left-color:var(--gone)}
+.alert .at{flex:1;min-width:0;font-size:14px;line-height:1.5;cursor:pointer}
+.alert .at b{display:block;font-size:14.5px}
+.alert .at span{color:var(--l2);font-size:13px}
+.alert button{border:0;background:transparent;color:var(--l3);font-size:18px;line-height:1;padding:2px 4px;cursor:pointer}
+
+/* 보관일수 설정 */
+.drow{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.drow:first-child{border-top:0}
+.drow .de{width:26px;text-align:center;font-size:19px}
+.drow .dn{flex:1;font-size:15px}
+.drow .dn small{color:var(--l3);font-size:12px;margin-left:5px}
+.drow input{width:70px;text-align:right;background:var(--fill);border:1px solid transparent;border-radius:9px;padding:8px 10px;font-size:15px;font-variant-numeric:tabular-nums}
+.drow input.changed{border-color:var(--brand)}
+.drow input::-webkit-inner-spin-button,.drow input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.drow input{-moz-appearance:textfield}
+.drow .du{font-size:14px;color:var(--l2);width:14px}
+
 /* 기록 · 백업 */
 .sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
 .sec h3{font-size:14px;color:var(--l2);font-weight:600;margin:0 0 12px}
@@ -267,7 +295,7 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 <div class="top">
   <h1>나의 냉장고</h1>
   <div class="icons">
-    <button class="ib" id="bRec" aria-label="기록과 백업">
+    <button class="ib" id="bRec" aria-label="기록과 설정">
       <svg viewBox="0 0 24 24"><path d="M5 20V10h3v10H5zm5.5 0V4h3v16h-3zM16 20v-7h3v7h-3z"/></svg>
     </button>
     <button class="ib" id="bSearch" aria-label="검색">
@@ -294,6 +322,11 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
     <option value="new">최근 등록순 ▾</option>
     <option value="name">이름순 ▾</option>
   </select>
+</div>
+
+<div class="alert" id="alert" role="status">
+  <div class="at" id="alertText"></div>
+  <button id="alertX" aria-label="오늘은 그만 보기">×</button>
 </div>
 
 <div class="list" id="list"></div>
@@ -391,6 +424,15 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 <div class="why" id="why" role="dialog" aria-label="꺼낸 이유">
   <h2 id="whyName">꺼내기</h2>
   <p id="whySub"></p>
+  <div class="whyqty" id="whyQty" hidden>
+    <span>꺼낼 수량</span>
+    <div class="stepper">
+      <button id="wqM" aria-label="꺼낼 수량 줄이기">−</button>
+      <span id="wqN">1</span>
+      <button id="wqP" aria-label="꺼낼 수량 늘리기">+</button>
+    </div>
+    <a id="wqAll">전부</a>
+  </div>
   <div class="whyrow">
     <button class="eat" id="whyEat">😋 먹음</button>
     <button class="toss" id="whyToss">🗑 버림</button>
@@ -399,10 +441,10 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 </div>
 
 <!-- 기록 · 백업 시트 -->
-<div class="sheet" id="rec" role="dialog" aria-label="기록과 백업">
+<div class="sheet" id="rec" role="dialog" aria-label="기록과 설정">
   <div class="nav">
     <span style="width:40px"></span>
-    <b>기록 · 백업</b>
+    <b>기록 · 설정</b>
     <button class="done" id="recClose">닫기</button>
   </div>
   <div class="body">
@@ -436,6 +478,12 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
     </div>
 
     <div class="sec">
+      <h3>종류별 보관일수 <span style="font-weight:400">· 종류를 고르면 오늘부터 이만큼 더해집니다</span></h3>
+      <div id="daysList"></div>
+      <button class="bk" id="bDaysReset">기본값으로 되돌리기</button>
+    </div>
+
+    <div class="sec">
       <h3>데이터 백업</h3>
       <button class="bk main" id="bExport">백업 파일 저장</button>
       <div class="bkrow">
@@ -463,6 +511,13 @@ const PLACES=['냉장','냉동','실온'];
 const KEY='fridge-items';
 const LOGKEY='fridge-log';
 const BKKEY='fridge-last-backup';
+const DAYSKEY='fridge-days';
+const ALERTKEY='fridge-alert-hidden';
+const DEF_DAYS=Object.fromEntries(CATS.map(c=>[c.k,c.d]));
+const DEF_FREEZE=90;
+let custom={};            // 사용자가 바꾼 보관일수만 담음 {종류:일수, '냉동':일수}
+const freezeDays=()=>custom['냉동']||DEF_FREEZE;
+function applyDays(){CATS.forEach(c=>{c.d=custom[c.k]||DEF_DAYS[c.k]})}
 
 /* 인식 서버 주소. 비워두면 수동 입력만 됩니다. */
 const WORKER='https://fridge-ai.garemania575.workers.dev';
@@ -470,7 +525,7 @@ const WORKER='https://fridge-ai.garemania575.workers.dev';
 let items=[],filter='all',query='',sortBy='exp',editing=null,undoItem=null;
 let draft={img:null,cat:null,icon:null,place:'냉장',qty:1};
 let capMode='barcode',foundList=[];
-let log=[],recMonth=null,whyId=null;
+let log=[],recMonth=null,whyId=null,whyCount=1;
 
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,'0');
@@ -504,7 +559,10 @@ async function sset(k,v){
 async function load(){
   try{items=JSON.parse(await sget(KEY)||'[]');if(!Array.isArray(items))items=[]}catch(e){items=[]}
   try{log=JSON.parse(await sget(LOGKEY)||'[]');if(!Array.isArray(log))log=[]}catch(e){log=[]}
+  try{custom=cleanDays(JSON.parse(await sget(DAYSKEY)||'{}'))}catch(e){custom={}}
+  applyDays();
   render();
+  showAlert();
 }
 let sv=null;
 function save(){
@@ -513,6 +571,7 @@ function save(){
     try{
       await sset(KEY,JSON.stringify(items));
       await sset(LOGKEY,JSON.stringify(log));
+      await sset(DAYSKEY,JSON.stringify(custom));
     }catch(e){toast('저장 공간이 부족합니다. 오래된 항목을 꺼내주세요')}
   },250);
 }
@@ -634,25 +693,45 @@ function askWhy(id){
   const n=left(it.exp);
   $('whyName').textContent=it.name+((it.qty||1)>1?` ×${it.qty}`:'');
   $('whySub').textContent=n===null?'어떻게 꺼냈나요?':n<0?`유통기한 ${-n}일 지남`:n===0?'오늘까지':`유통기한 ${n}일 남음`;
-  $('whyBg').classList.add('on');$('why').classList.add('on');
+  whyCount=1;
+  $('whyQty').hidden=(it.qty||1)<=1;
+  drawWhyQty(it);
+  $('whyBg').classList.add('on');$('why').classList.add('on');syncHistory();
 }
-function closeWhy(){$('whyBg').classList.remove('on');$('why').classList.remove('on');whyId=null}
-$('whyEat').onclick=()=>{const id=whyId;closeWhy();remove(id,'eat')};
-$('whyToss').onclick=()=>{const id=whyId;closeWhy();remove(id,'toss')};
+function drawWhyQty(it){
+  const max=it.qty||1;
+  $('wqN').textContent=whyCount;
+  $('wqAll').textContent=whyCount===max?`전체 ${max}개`:'전부';
+}
+const whyItem=()=>items.find(x=>x.id===whyId);
+$('wqM').onclick=()=>{const it=whyItem();if(!it)return;whyCount=Math.max(1,whyCount-1);drawWhyQty(it)};
+$('wqP').onclick=()=>{const it=whyItem();if(!it)return;whyCount=Math.min(it.qty||1,whyCount+1);drawWhyQty(it)};
+$('wqAll').onclick=()=>{const it=whyItem();if(!it)return;whyCount=it.qty||1;drawWhyQty(it)};
+function closeWhy(){$('whyBg').classList.remove('on');$('why').classList.remove('on');whyId=null;syncHistory()}
+$('whyEat').onclick=()=>{const id=whyId,n=whyCount;closeWhy();remove(id,'eat',n)};
+$('whyToss').onclick=()=>{const id=whyId,n=whyCount;closeWhy();remove(id,'toss',n)};
 $('whyCancel').onclick=()=>{closeWhy();render()};
 $('whyBg').onclick=()=>{closeWhy();render()};
 
-function remove(id,reason){
+function remove(id,reason,count){
   const i=items.findIndex(x=>x.id===id);
   if(i<0){render();return}
-  const it=items[i];
+  const it=items[i],had=it.qty||1;
+  const n=Math.min(had,Math.max(1,count||had));
   const entry={id:newId(),itemId:it.id,name:it.name,cat:it.cat||'기타',icon:it.icon||null,
-    place:it.place||'냉장',qty:it.qty||1,exp:it.exp||'',reason,at:ymd(today())};
-  undoItem={item:it,at:i,logId:entry.id};
-  items.splice(i,1);log.push(entry);save();render();
-  toast(`${it.name} ${reason==='toss'?'버림':'먹음'}으로 꺼냄`,()=>{
+    place:it.place||'냉장',qty:n,exp:it.exp||'',reason,at:ymd(today())};
+  const partial=n<had;
+  undoItem={item:it,at:i,logId:entry.id,partial,had};
+  if(partial)items[i]={...it,qty:had-n};
+  else items.splice(i,1);
+  log.push(entry);save();render();showAlert();
+  const label=reason==='toss'?'버림':'먹음';
+  toast(partial?`${it.name} ${n}개 ${label} · ${had-n}개 남음`:`${it.name}${n>1?` ${n}개`:''} ${label}으로 꺼냄`,()=>{
     if(!undoItem)return;
-    items.splice(undoItem.at,0,undoItem.item);
+    if(undoItem.partial){
+      const j=items.findIndex(x=>x.id===undoItem.item.id);
+      if(j>=0)items[j]={...items[j],qty:undoItem.had};
+    }else items.splice(undoItem.at,0,undoItem.item);
     log=log.filter(x=>x.id!==undoItem.logId);
     undoItem=null;save();render();
   });
@@ -666,9 +745,9 @@ const GUIDE={
 };
 function openCap(){
   foundList=[];$('found').innerHTML='';$('capAdd').hidden=true;$('capMsg').textContent='';
-  setMode('barcode');$('cap').classList.add('on');
+  setMode('barcode');$('cap').classList.add('on');syncHistory();
 }
-function closeCap(){$('cap').classList.remove('on')}
+function closeCap(){$('cap').classList.remove('on');syncHistory()}
 function setMode(m){
   capMode=m;
   document.querySelectorAll('.captab').forEach(b=>b.setAttribute('aria-selected',b.dataset.m===m?'true':'false'));
@@ -756,7 +835,7 @@ async function doReceipt(file){
     })).filter(x=>x.name);
     drawFound();
     msg.textContent=`${foundList.length}개를 찾았습니다. 담을 것만 남겨주세요`;
-  }catch(e){msg.textContent='영수증을 읽지 못했습니다'}
+  }catch(e){msg.textContent=`영수증을 읽지 못했습니다 — ${reasonOf(e)}`}
 }
 function drawFound(){
   const host=$('found');host.innerHTML='';
@@ -776,7 +855,7 @@ $('capAdd').onclick=()=>{
   if(!pick.length){closeCap();return}
   pick.forEach(x=>{
     const c=CATS.find(y=>y.k===x.cat)||CATS[13];
-    items.push({id:newId(),name:x.name,cat:c.k,exp:plus(x.days||c.d),
+    items.push({id:newId(),name:x.name,cat:c.k,exp:plus(custom[c.k]?c.d:(x.days||c.d)),
       img:null,icon:c.e,place:'냉장',qty:1});
   });
   save();render();closeCap();toast(`${pick.length}개를 담았습니다`);
@@ -795,7 +874,7 @@ PLACES.forEach(p=>{
     draft.place=p;pressOnly($('places'),b);
     if(draft.cat){
       const c=CATS.find(x=>x.k===draft.cat);
-      const days=p==='냉동'?90:c.d;
+      const days=p==='냉동'?freezeDays():c.d;
       $('exp').value=plus(days);
       $('expHint').textContent=`${p==='냉동'?'냉동':c.k} 기준 ${days}일`;
     }
@@ -809,7 +888,7 @@ CATS.forEach(c=>{
   b.textContent=`${c.e} ${c.k}`;
   b.onclick=()=>{
     draft.cat=c.k;pressOnly($('cats'),b);
-    const days=draft.place==='냉동'?90:c.d;
+    const days=draft.place==='냉동'?freezeDays():c.d;
     $('exp').value=plus(days);
     $('expHint').textContent=`${draft.place==='냉동'?'냉동':c.k} 기준 ${days}일`;
     if(!draft.icon){
@@ -855,9 +934,9 @@ function openSheet(it){
   pressOnly($('icons'),draft.icon?[...$('icons').children].find(x=>x.textContent===draft.icon):null);
 
   check();
-  $('scrim').classList.add('on');$('sheet').classList.add('on');
+  $('scrim').classList.add('on');$('sheet').classList.add('on');syncHistory();
 }
-function closeSheet(){$('scrim').classList.remove('on');$('sheet').classList.remove('on');editing=null}
+function closeSheet(){$('scrim').classList.remove('on');$('sheet').classList.remove('on');editing=null;syncHistory()}
 $('cancel').onclick=closeSheet;
 $('scrim').onclick=closeSheet;
 $('del').onclick=()=>{const id=editing&&editing.id;closeSheet();if(id)askWhy(id)};
@@ -877,7 +956,7 @@ $('done').onclick=()=>{
   }else{
     items.push({id:newId(),...data});toast('넣었습니다');
   }
-  save();render();closeSheet();
+  save();render();closeSheet();showAlert();
 };
 
 $('name').addEventListener('input',check);
@@ -954,12 +1033,38 @@ const P={
 };
 const parts=url=>[url.split(',')[1],(url.match(/^data:(image\/[a-z+]+);/)||[])[1]||'image/jpeg'];
 
+/* 인식 실패 원인을 사람이 읽을 수 있는 문장으로 */
+class AskError extends Error{constructor(m){super(m);this.reason=m}}
+function whyFailed(r,j){
+  const st=j&&j.status, d=String((j&&j.detail)||'');
+  if(r.status===403&&!st)return '허용되지 않은 주소에서 요청했습니다 (워커의 ALLOWED_ORIGIN 확인)';
+  if(r.status===413)return '사진이 너무 큽니다';
+  if(r.status===405)return '워커 코드가 다릅니다 (worker-gemini.js 배포 확인)';
+  if(st){
+    if(/API_KEY_INVALID|API key not valid/i.test(d))return 'API 키가 잘못됐거나 등록되지 않았습니다 (Secret GEMINI_API_KEY 확인)';
+    if(st===400&&/location|region|not supported/i.test(d))return '이 지역에서 쓸 수 없는 모델입니다';
+    if(st===401||st===403)return 'API 키 권한 문제입니다 (키 재발급 또는 Secret 확인)';
+    if(st===404)return '모델을 찾을 수 없습니다 (워커의 MODEL 이름 확인)';
+    if(st===429)return '무료 할당량을 넘었습니다. 잠시 후 다시 해주세요';
+    if(st>=500)return '구글 서버가 응답하지 않습니다. 잠시 후 다시 해주세요';
+    return `구글 오류 ${st}`;
+  }
+  if(j&&j.error)return j.error;
+  return `서버 오류 ${r.status}`;
+}
+const reasonOf=e=>e&&e.reason?e.reason:'응답을 해석하지 못했습니다';
+
 async function ask(b64,mt,mode){
   if(WORKER){
-    const r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({image:b64,media_type:mt,mode})});
-    const j=await r.json();
-    if(!r.ok||j.error)throw 0;
+    if(!navigator.onLine)throw new AskError('인터넷에 연결되어 있지 않습니다');
+    let r;
+    try{
+      r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({image:b64,media_type:mt,mode})});
+    }catch(e){throw new AskError('인식 서버에 연결하지 못했습니다 (워커 주소·배포 확인)')}
+    let j;
+    try{j=await r.json()}catch(e){throw new AskError('인식 서버 응답이 이상합니다 (worker-gemini.js 배포 확인)')}
+    if(!r.ok||j.error){console.warn('인식 실패',r.status,j);throw new AskError(whyFailed(r,j))}
     return j;
   }
   const r=await fetch('https://api.anthropic.com/v1/messages',{
@@ -991,12 +1096,12 @@ async function recognize(url){
       draft.icon=j.icon;
       pressOnly($('icons'),[...$('icons').children].find(x=>x.textContent===j.icon));
     }
-    if(Number.isInteger(j.days)&&j.days>0&&!$('exp').value)$('exp').value=plus(j.days);
+    if(Number.isInteger(j.days)&&j.days>0&&!$('exp').value&&!(draft.cat&&custom[draft.cat]))$('exp').value=plus(j.days);
     check();
     const low=j.sure!==undefined&&j.sure<0.6;
     s.textContent=(low?`${j.name} 같습니다. 확인해주세요`:`${j.name} 으로 채웠습니다`)+' → 이제 유통기한을 찍어주세요';
     $('bDate').classList.add('hl');
-  }catch(e){s.textContent='알아보지 못했습니다. 직접 적어주세요'}
+  }catch(e){s.textContent=`알아보지 못했습니다 — ${reasonOf(e)}`}
 }
 
 async function readDate(url){
@@ -1014,19 +1119,94 @@ async function readDate(url){
     const n=left(j.date);
     const warn=j.kind==='제조일자'?' (제조일자로 보입니다. 확인해주세요)':'';
     s.textContent=`${pretty(j.date)}${n<0?' — 이미 지났습니다':''}${warn}`;
-  }catch(e){s.textContent='날짜를 읽지 못했습니다. 직접 입력해주세요'}
+  }catch(e){s.textContent=`날짜를 읽지 못했습니다 — ${reasonOf(e)}`}
 }
 
 /* ---------- 검색 · 필터 · 정렬 ---------- */
+function closeSearch(){$('searchwrap').classList.remove('on');$('q').value='';query='';render();syncHistory()}
 $('bSearch').onclick=()=>{
-  const w=$('searchwrap');w.classList.toggle('on');
-  if(w.classList.contains('on'))$('q').focus();
-  else{$('q').value='';query='';render()}
+  const w=$('searchwrap');
+  if(w.classList.contains('on')){closeSearch();return}
+  w.classList.add('on');$('q').focus();syncHistory();
 };
 $('q').addEventListener('input',e=>{query=e.target.value;render()});
 $('statSoon').onclick=()=>{filter=filter==='soon'?'all':'soon';render()};
 $('statGone').onclick=()=>{filter=filter==='gone'?'all':'gone';render()};
 $('sort').onchange=e=>{sortBy=e.target.value;render()};
+
+/* ---------- 임박 알림 ---------- */
+async function showAlert(){
+  const box=$('alert');
+  const td=ymd(today());
+  if(await sget(ALERTKEY)===td){box.classList.remove('on');return}
+  const withN=items.map(i=>({...i,n:left(i.exp)})).filter(i=>i.n!==null&&i.n<=1);
+  if(!withN.length){box.classList.remove('on');return}
+  const gone=withN.filter(i=>i.n<0),d0=withN.filter(i=>i.n===0),d1=withN.filter(i=>i.n===1);
+  const names=a=>{const s=a.slice(0,3).map(i=>i.name).join(', ');return a.length>3?`${s} 외 ${a.length-3}개`:s};
+  const parts=[];
+  if(d0.length)parts.push(`오늘까지 ${d0.length}개`);
+  if(d1.length)parts.push(`내일까지 ${d1.length}개`);
+  if(gone.length)parts.push(`지난 것 ${gone.length}개`);
+  const first=d0.length?d0:d1.length?d1:gone;
+  $('alertText').innerHTML='';
+  const b=document.createElement('b');b.textContent=parts.join(' · ');
+  const s=document.createElement('span');s.textContent=names(first)+' — 누르면 모아 봅니다';
+  $('alertText').append(b,s);
+  box.classList.toggle('bad',!d0.length&&!d1.length);
+  box.classList.add('on');
+}
+$('alertText').onclick=()=>{
+  const hasSoon=items.some(i=>{const n=left(i.exp);return n!==null&&n>=0&&n<=1});
+  filter=hasSoon?'soon':'gone';sortBy='exp';$('sort').value='exp';render();
+};
+$('alertX').onclick=async()=>{
+  $('alert').classList.remove('on');
+  try{await sset(ALERTKEY,ymd(today()))}catch(e){}
+};
+// 앱을 켜 둔 채 날짜가 바뀌거나 다시 열었을 때도 갱신
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){render();showAlert()}});
+
+/* ---------- 보관일수 설정 ---------- */
+function cleanDays(o){
+  const out={};
+  if(!o||typeof o!=='object')return out;
+  Object.keys(o).forEach(k=>{
+    const v=parseInt(o[k],10);
+    const def=k==='냉동'?DEF_FREEZE:DEF_DAYS[k];
+    if(def!==undefined&&v>=1&&v<=999&&v!==def)out[k]=v;
+  });
+  return out;
+}
+function renderDays(){
+  const host=$('daysList');host.innerHTML='';
+  const rows=[...CATS.map(c=>({k:c.k,e:c.e,def:DEF_DAYS[c.k],label:c.k})),
+    {k:'냉동',e:'❄️',def:DEF_FREEZE,label:'냉동 위치'}];
+  rows.forEach(r=>{
+    const row=document.createElement('label');row.className='drow';
+    const e=document.createElement('span');e.className='de';e.textContent=r.e;
+    const n=document.createElement('span');n.className='dn';n.textContent=r.label;
+    const sm=document.createElement('small');sm.textContent=r.note||`기본 ${r.def}일`;n.appendChild(sm);
+    const inp=document.createElement('input');inp.type='number';inp.inputMode='numeric';inp.min=1;inp.max=999;
+    inp.value=custom[r.k]||r.def;
+    inp.setAttribute('aria-label',`${r.label} 보관일수`);
+    inp.classList.toggle('changed',!!custom[r.k]);
+    inp.onchange=()=>{
+      let v=parseInt(inp.value,10);
+      if(!(v>=1&&v<=999)){inp.value=custom[r.k]||r.def;toast('1~999일 사이로 적어주세요');return}
+      if(v===r.def)delete custom[r.k];else custom[r.k]=v;
+      applyDays();save();
+      inp.classList.toggle('changed',!!custom[r.k]);
+      toast(`${r.label} ${v}일로 저장했습니다`);
+    };
+    const u=document.createElement('span');u.className='du';u.textContent='일';
+    row.append(e,n,inp,u);host.appendChild(row);
+  });
+}
+$('bDaysReset').onclick=()=>{
+  if(!Object.keys(custom).length){toast('이미 기본값입니다');return}
+  if(!confirm('종류별 보관일수를 모두 기본값으로 되돌릴까요?'))return;
+  custom={};applyDays();save();renderDays();toast('기본값으로 되돌렸습니다');
+};
 
 /* ---------- 기록 · 통계 ---------- */
 const ymKey=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}`;
@@ -1036,9 +1216,9 @@ const ymLabel=ym=>`${ym.slice(0,4)}년 ${+ym.slice(4,6)}월`;
 function openRec(){
   recMonth=ymKey(new Date());
   renderRec();
-  $('scrim').classList.add('on');$('rec').classList.add('on');
+  $('scrim').classList.add('on');$('rec').classList.add('on');syncHistory();
 }
-function closeRec(){$('rec').classList.remove('on');$('scrim').classList.remove('on')}
+function closeRec(){$('rec').classList.remove('on');$('scrim').classList.remove('on');showAlert();syncHistory()}
 $('bRec').onclick=openRec;
 $('recClose').onclick=closeRec;
 $('scrim').addEventListener('click',()=>{if($('rec').classList.contains('on'))closeRec()});
@@ -1117,6 +1297,7 @@ function renderRec(){
     r.append(i,mm,ch);ll.appendChild(r);
   });
 
+  renderDays();
   showBackupInfo();
 }
 
@@ -1128,7 +1309,7 @@ async function showBackupInfo(){
 }
 $('bExport').onclick=async()=>{
   try{
-    const data={app:'fridge',version:1,exported:new Date().toISOString(),items,log};
+    const data={app:'fridge',version:2,exported:new Date().toISOString(),items,log,days:custom};
     const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);a.download=`fridge-backup-${ymd(today())}.json`;
@@ -1157,6 +1338,7 @@ $('fImport').onchange=e=>{
     if(importMode==='replace'){
       if(!confirm(`지금 목록을 지우고 백업의 상품 ${okItems.length}개, 기록 ${okLog.length}건으로 바꿀까요?`))return;
       items=okItems;log=okLog;
+      if(d&&d.days){custom=cleanDays(d.days);applyDays()}
       toast('백업으로 바꿨습니다');
     }else{
       const hasI=new Set(items.map(x=>String(x.id))),hasL=new Set(log.map(x=>String(x.id)));
@@ -1164,10 +1346,37 @@ $('fImport').onchange=e=>{
       items.push(...addI);log.push(...addL);
       toast(`상품 ${addI.length}개, 기록 ${addL.length}건을 추가했습니다`);
     }
-    save();render();renderRec();
+    save();render();renderRec();showAlert();
   };
   r.readAsText(f);
 };
+
+/* ---------- 뒤로가기 ----------
+   창이 하나라도 열려 있으면 기록(history)에 한 칸을 끼워 두고,
+   뒤로가기가 오면 앱을 닫는 대신 맨 위 창만 닫는다 */
+const LAYERS=[   // 위에 떠 있는 순서
+  {open:()=>$('why').classList.contains('on'),close:()=>{closeWhy();render()}},
+  {open:()=>$('cap').classList.contains('on'),close:()=>closeCap()},
+  {open:()=>$('sheet').classList.contains('on'),close:()=>closeSheet()},
+  {open:()=>$('rec').classList.contains('on'),close:()=>closeRec()},
+  {open:()=>$('searchwrap').classList.contains('on'),close:()=>closeSearch()}
+];
+let guarded=false,skipPop=false,histT=null;
+const anyOpen=()=>LAYERS.some(l=>l.open());
+function syncHistory(){
+  clearTimeout(histT);
+  histT=setTimeout(()=>{       // 창 전환(닫고 바로 열기) 중에는 기록을 건드리지 않도록 한 박자 늦춤
+    const open=anyOpen();
+    if(open&&!guarded){history.pushState({fridgeLayer:1},'');guarded=true}
+    else if(!open&&guarded){guarded=false;skipPop=true;history.back()}
+  },0);
+}
+window.addEventListener('popstate',()=>{
+  if(skipPop){skipPop=false;return}
+  guarded=false;
+  const top=LAYERS.find(l=>l.open());
+  if(top)top.close();           // close 안에서 syncHistory가 호출되어, 창이 남아 있으면 다시 한 칸 끼움
+});
 
 /* ---------- 토스트 ---------- */
 let tt=null;
