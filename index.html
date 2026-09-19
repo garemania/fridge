@@ -1126,12 +1126,14 @@ function whyFailed(r,j){
   if(r.status===405)return '워커 코드가 다릅니다 (worker-gemini.js 배포 확인)';
   if(st){
     if(/API_KEY_INVALID|API key not valid/i.test(d))return 'API 키가 잘못됐거나 등록되지 않았습니다 (Secret GEMINI_API_KEY 확인)';
-    if(st===400&&/location|region|not supported/i.test(d))return '이 지역에서 쓸 수 없는 모델입니다';
+    if(/User location is not supported|FAILED_PRECONDITION/i.test(d))
+      return '구글이 이 서버 위치를 막았습니다. 잠시 후 다시 해보고 계속되면 알려주세요';
+    if(st===400)return `구글 오류 400 — ${d.slice(0,80)||'내용 없음'}`;
     if(st===401||st===403)return 'API 키 권한 문제입니다 (키 재발급 또는 Secret 확인)';
     if(st===404)return '모델을 찾을 수 없습니다 (워커의 MODEL 이름 확인)';
     if(st===429)return '무료 할당량을 넘었습니다. 잠시 후 다시 해주세요';
     if(st>=500)return '구글 서버가 응답하지 않습니다. 잠시 후 다시 해주세요';
-    return `구글 오류 ${st}`;
+    return `구글 오류 ${st}${d?' — '+d.slice(0,80):''}`;
   }
   if(j&&j.error)return j.error;
   return `서버 오류 ${r.status}`;
