@@ -140,7 +140,7 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
   transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);
 }
 .cap.on{transform:translateY(0)}
-.capguide{padding:calc(22px + env(safe-area-inset-top)) 24px 8px;text-align:center;font-size:15.5px}
+.capguide{padding:calc(64px + env(safe-area-inset-top)) 24px 8px;text-align:center;font-size:17px;font-weight:600}
 .capsub{color:rgba(255,255,255,.5);font-size:13px;text-align:center;padding:0 30px;line-height:1.6}
 .capmain{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px}
 .shutter{
@@ -149,15 +149,14 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 }
 .shutter:active{transform:scale(.93)}
 .capmsg{color:rgba(255,255,255,.75);font-size:14px;text-align:center;min-height:20px;padding:0 24px}
-.captabs{display:flex;border-top:1px solid rgba(255,255,255,.12)}
-.captab{
-  flex:1;border:0;background:transparent;color:rgba(255,255,255,.45);
-  padding:16px 0 calc(16px + env(safe-area-inset-bottom));font-size:14.5px;cursor:pointer;position:relative;
+.capfoot{display:flex;border-top:1px solid rgba(255,255,255,.12)}
+.caplink{
+  flex:1;border:0;background:transparent;color:rgba(255,255,255,.8);
+  padding:17px 0 calc(17px + env(safe-area-inset-bottom));font-size:15px;cursor:pointer;
 }
-.captab[aria-selected="true"]{color:#fff;font-weight:700}
-.captab[aria-selected="true"]::after{
-  content:"";position:absolute;left:24%;right:24%;bottom:calc(8px + env(safe-area-inset-bottom));height:2.5px;background:#fff;border-radius:2px;
-}
+.caplink+.caplink{border-left:1px solid rgba(255,255,255,.12)}
+.caplink:active{background:rgba(255,255,255,.08)}
+.caplink:disabled,.shutter:disabled{opacity:.4}
 .capclose{
   position:absolute;top:calc(18px + env(safe-area-inset-top));left:16px;
   border:0;background:transparent;color:#fff;font-size:15px;cursor:pointer;padding:6px;
@@ -335,19 +334,19 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 <!-- 촬영 화면 -->
 <div class="cap" id="cap">
   <button class="capclose" id="capX">취소</button>
-  <div class="capguide" id="capGuide">바코드를 찍어주세요</div>
-  <div class="capsub" id="capSub">포장의 바코드가 화면에 가득 차게 찍으면 정확합니다</div>
+  <div class="capguide">무엇이든 찍어주세요</div>
+  <div class="capsub">식품 · 바코드 · 영수증을 알아서 구분합니다<br>영수증이면 여러 품목을 한 번에 담습니다</div>
   <div class="capmain">
     <button class="shutter" id="shutter" aria-label="촬영">📷</button>
     <div class="capmsg" id="capMsg"></div>
     <div class="found" id="found"></div>
     <button class="capbtn" id="capAdd" hidden>담기</button>
   </div>
-  <div class="captabs" role="tablist">
-    <button class="captab" role="tab" data-m="barcode" aria-selected="true">바코드</button>
-    <button class="captab" role="tab" data-m="receipt" aria-selected="false">명세표/영수증</button>
-    <button class="captab" role="tab" data-m="manual" aria-selected="false">직접 입력</button>
+  <div class="capfoot">
+    <button class="caplink" id="capAlb">🖼 앨범에서 고르기</button>
+    <button class="caplink" id="capManual">✏️ 직접 입력</button>
   </div>
+  <input type="file" id="fCapAlb" accept="image/*" hidden>
   <input type="file" id="fCap" accept="image/*" capture="environment" hidden>
 </div>
 
@@ -504,10 +503,13 @@ const CATS=[
  {k:'육류',e:'🥩',d:3},{k:'해산물',e:'🐟',d:2},{k:'유제품',e:'🥛',d:7},
  {k:'계란',e:'🥚',d:21},{k:'두부·콩',e:'🫘',d:5},{k:'반찬',e:'🥘',d:3},
  {k:'빵',e:'🍞',d:4},{k:'냉동식품',e:'🧊',d:90},{k:'양념',e:'🧂',d:180},
- {k:'음료',e:'🧃',d:14},{k:'기타',e:'📦',d:7}
+ {k:'음료',e:'🧃',d:14},{k:'과자·간식',e:'🍫',d:180,place:'실온'},
+ {k:'가공식품',e:'🥫',d:180,place:'실온'},{k:'기타',e:'📦',d:7}
 ];
-const ICONS=['🥬','🥕','🧅','🍅','🥦','🌽','🍎','🍌','🍓','🍇','🥩','🍗','🐟','🦐','🥚','🥛','🧀','🧈','🫘','🍚','🥘','🍜','🍞','🧊','🧂','🍶','🧃','☕','🍫','📦'];
+const ICONS=['🥬','🥕','🧅','🍅','🥦','🌽','🍎','🍌','🍓','🍇','🥩','🍗','🐟','🦐','🥚','🥛','🧀','🧈','🫘','🍚','🥘','🍜','🍞','🧊','🧂','🍶','🧃','☕','🍫','🍬','🍪','🥫','📦'];
 const PLACES=['냉장','냉동','실온'];
+const ETC=CATS[CATS.length-1];   // 기타
+const catOf=k=>CATS.find(c=>c.k===k)||ETC;
 const KEY='fridge-items';
 const LOGKEY='fridge-log';
 const BKKEY='fridge-last-backup';
@@ -524,7 +526,7 @@ const WORKER='https://fridge-ai.garemania575.workers.dev';
 
 let items=[],filter='all',query='',sortBy='exp',editing=null,undoItem=null;
 let draft={img:null,cat:null,icon:null,place:'냉장',qty:1};
-let capMode='barcode',foundList=[];
+let foundList=[],capBusy=false;
 let log=[],recMonth=null,whyId=null,whyCount=1;
 
 const $=id=>document.getElementById(id);
@@ -610,7 +612,7 @@ function render(){
 }
 
 function rowEl(it){
-  const c=CATS.find(x=>x.k===it.cat)||CATS[13];
+  const c=catOf(it.cat);
   const tone=it.n===null?'var(--l3)':it.n<0?'var(--gone)':it.n<=3?'var(--soon)':'var(--brandD)';
 
   const wrap=document.createElement('div');wrap.className='row';
@@ -737,106 +739,96 @@ function remove(id,reason,count){
   });
 }
 
-/* ---------- 촬영 화면 ---------- */
-const GUIDE={
-  barcode:['바코드를 찍어주세요','포장의 바코드가 화면에 가득 차게 찍으면 정확합니다'],
-  receipt:['영수증이나 명세표를 찍어주세요','여러 품목을 한 번에 담을 수 있습니다'],
-  manual:['직접 입력하기','사진 없이 이름과 유통기한만 적어 넣습니다']
-};
+/* ---------- 촬영 화면 (한 번에 찍기) ---------- */
 function openCap(){
   foundList=[];$('found').innerHTML='';$('capAdd').hidden=true;$('capMsg').textContent='';
-  setMode('barcode');$('cap').classList.add('on');syncHistory();
+  setBusy(false);
+  $('cap').classList.add('on');syncHistory();
 }
 function closeCap(){$('cap').classList.remove('on');syncHistory()}
-function setMode(m){
-  capMode=m;
-  document.querySelectorAll('.captab').forEach(b=>b.setAttribute('aria-selected',b.dataset.m===m?'true':'false'));
-  $('capGuide').textContent=GUIDE[m][0];
-  $('capSub').textContent=GUIDE[m][1];
-  $('shutter').textContent=m==='manual'?'✏️':'📷';
-  $('capMsg').textContent='';
-  foundList=[];$('found').innerHTML='';$('capAdd').hidden=true;
-}
-document.querySelectorAll('.captab').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+function setBusy(on){capBusy=on;$('shutter').disabled=on;$('capAlb').disabled=on}
 $('capX').onclick=closeCap;
 $('fab').onclick=openCap;
-$('shutter').onclick=()=>{
-  if(capMode==='manual'){closeCap();openSheet(null);return}
-  const i=$('fCap');i.value='';
-  try{i.click()}catch(e){$('capMsg').textContent='카메라를 열 수 없습니다'}
-};
-$('fCap').onchange=e=>{
-  const f=e.target.files&&e.target.files[0];
-  if(!f)return;
-  capMode==='barcode'?doBarcode(f):doReceipt(f);
-};
+$('capManual').onclick=()=>{closeCap();openSheet(null)};
+$('shutter').onclick=()=>{if(!capBusy)openPicker('fCap')};
+$('capAlb').onclick=()=>{if(!capBusy)openPicker('fCapAlb')};
+$('fCap').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)doCapture(f)};
+$('fCapAlb').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)doCapture(f)};
 
-/* 바코드 → 제품명 조회 */
-async function doBarcode(file){
-  const msg=$('capMsg');
-  msg.textContent='바코드 읽는 중…';
-  let code=null;
+async function readBarcode(file){
   try{
-    if('BarcodeDetector' in window){
-      const det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39']});
-      const bmp=await createImageBitmap(file);
-      const res=await det.detect(bmp);
-      if(res&&res.length)code=res[0].rawValue;
-    }
-  }catch(e){}
-
-  if(!code){
-    msg.textContent='바코드를 못 읽었습니다. 사진으로 알아보는 중…';
-    const url=await shrink(file);
-    closeCap();openSheet(null);
-    draft.img=url;$('prev').src=url;$('prev').style.display='block';
-    check();recognize(url);
-    return;
-  }
-
-  msg.textContent=`${code} 조회 중…`;
-  let nm='';
+    if(!('BarcodeDetector' in window))return null;
+    const det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
+    const res=await det.detect(await createImageBitmap(file));
+    return res&&res.length?res[0].rawValue:null;
+  }catch(e){return null}
+}
+async function lookupBarcode(code){
   try{
     const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,product_name_ko,brands`);
-    const d=await r.json();
-    const p=d&&d.product;
-    if(p)nm=[p.brands?String(p.brands).split(',')[0].trim():'',p.product_name_ko||p.product_name||''].filter(Boolean).join(' ').trim();
-  }catch(e){}
-
-  const url=await shrink(file);
-  closeCap();openSheet(null);
-  draft.img=url;$('prev').src=url;$('prev').style.display='block';
-  if(nm){
-    $('name').value=nm;check();
-    $('aiStat').textContent=`${nm} — 이제 유통기한을 찍어주세요`;
-    $('bDate').classList.add('hl');
-  }else{
-    $('aiStat').textContent='등록된 제품이 아닙니다. 사진으로 알아보는 중…';
-    recognize(url);
-  }
+    const d=await r.json();const p=d&&d.product;
+    if(!p)return '';
+    return [p.brands?String(p.brands).split(',')[0].trim():'',p.product_name_ko||p.product_name||''].filter(Boolean).join(' ').trim();
+  }catch(e){return ''}
 }
 
-/* 영수증 → 여러 품목 한 번에 */
-async function doReceipt(file){
+/* 1) 바코드가 있고 제품 조회에 성공하면 그 이름을 쓰고, AI로 종류만 채움
+   2) 아니면 AI가 사진을 보고 영수증인지 식품인지 판단 */
+async function doCapture(file){
   const msg=$('capMsg');
-  if(!canAI()){msg.textContent='인식 서버가 연결되지 않았습니다';return}
-  msg.textContent='영수증 읽는 중…';
+  foundList=[];$('found').innerHTML='';$('capAdd').hidden=true;
+  setBusy(true);
   try{
-    const url=await shrink(file,900);
-    const [b64,mt]=parts(url);
-    const j=await ask(b64,mt,'receipt');
-    const arr=(j&&j.items)||[];
-    if(!arr.length){msg.textContent='품목을 찾지 못했습니다';return}
-    foundList=arr.map(x=>({
-      name:String(x.name||'').slice(0,20),
-      cat:CATS.some(c=>c.k===x.cat)?x.cat:'기타',
-      days:Number.isInteger(x.days)&&x.days>0?x.days:null,
-      on:true
-    })).filter(x=>x.name);
-    drawFound();
-    msg.textContent=`${foundList.length}개를 찾았습니다. 담을 것만 남겨주세요`;
-  }catch(e){msg.textContent=`영수증을 읽지 못했습니다 — ${reasonOf(e)}`}
+    msg.textContent='사진 확인 중…';
+    const thumb=await shrink(file);           // 목록에 저장할 작은 사진
+    const code=await readBarcode(file);
+    if(code){
+      msg.textContent=`바코드 ${code} 조회 중…`;
+      const nm=await lookupBarcode(code);
+      if(nm){
+        closeCap();openSheet(null);setPhoto(thumb);
+        $('name').value=nm;check();
+        recognize(thumb,{barcodeName:nm});
+        return;
+      }
+    }
+    if(!canAI()){
+      closeCap();openSheet(null);setPhoto(thumb);
+      $('aiStat').textContent=code?'등록되지 않은 바코드입니다. 직접 적어주세요':'';
+      return;
+    }
+    msg.textContent=code?'등록되지 않은 바코드입니다. 사진으로 알아보는 중…':'무엇인지 알아보는 중…';
+    const big=await shrink(file,900);          // 영수증 글씨를 읽을 수 있는 크기
+    const [b64,mt]=parts(big);
+    const j=await ask(b64,mt,'auto');
+
+    if(j.type==='receipt'){
+      const arr=Array.isArray(j.items)?j.items:[];
+      foundList=arr.map(x=>({
+        name:String(x.name||'').slice(0,20),
+        cat:CATS.some(c=>c.k===x.cat)?x.cat:ETC.k,
+        days:Number.isInteger(x.days)&&x.days>0?x.days:null,
+        on:true
+      })).filter(x=>x.name);
+      if(!foundList.length){msg.textContent='영수증에서 식품을 찾지 못했습니다';return}
+      drawFound();
+      msg.textContent=`영수증에서 ${foundList.length}개를 찾았습니다. 담을 것만 남겨주세요`;
+      return;
+    }
+    if(j.type==='item'&&j.name){
+      closeCap();openSheet(null);setPhoto(thumb);
+      applyItem(j);
+      return;
+    }
+    msg.textContent='식품이나 영수증을 찾지 못했습니다. 다시 찍거나 직접 입력해주세요';
+  }catch(e){
+    msg.textContent=`알아보지 못했습니다 — ${reasonOf(e)}`;
+  }finally{setBusy(false)}
 }
+function setPhoto(url){draft.img=url;$('prev').src=url;$('prev').style.display='block';check()}
+
+// 종류를 알면 종류 기본일수(사용자 설정 포함), 기타일 때만 AI 추정일수
+function receiptDays(x){const c=catOf(x.cat);return c===ETC&&!custom[c.k]&&x.days?x.days:c.d}
 function drawFound(){
   const host=$('found');host.innerHTML='';
   foundList.forEach((x,i)=>{
@@ -845,7 +837,7 @@ function drawFound(){
     cb.onchange=()=>{foundList[i].on=cb.checked};
     const s=document.createElement('span');s.textContent=x.name;
     const em=document.createElement('em');
-    em.textContent=x.cat+(x.days?` · ${x.days}일`:'');
+    em.textContent=`${x.cat} · ${receiptDays(x)}일`;
     d.append(cb,s,em);host.appendChild(d);
   });
   $('capAdd').hidden=false;
@@ -854,9 +846,9 @@ $('capAdd').onclick=()=>{
   const pick=foundList.filter(x=>x.on);
   if(!pick.length){closeCap();return}
   pick.forEach(x=>{
-    const c=CATS.find(y=>y.k===x.cat)||CATS[13];
-    items.push({id:newId(),name:x.name,cat:c.k,exp:plus(custom[c.k]?c.d:(x.days||c.d)),
-      img:null,icon:c.e,place:'냉장',qty:1});
+    const c=catOf(x.cat);
+    items.push({id:newId(),name:x.name,cat:c.k,exp:plus(receiptDays(x)),
+      img:null,icon:c.e,place:c.place||'냉장',qty:1});
   });
   save();render();closeCap();toast(`${pick.length}개를 담았습니다`);
 };
@@ -888,6 +880,10 @@ CATS.forEach(c=>{
   b.textContent=`${c.e} ${c.k}`;
   b.onclick=()=>{
     draft.cat=c.k;pressOnly($('cats'),b);
+    if(c.place&&draft.place!==c.place){
+      draft.place=c.place;
+      pressOnly($('places'),[...$('places').children].find(x=>x.textContent===c.place));
+    }
     const days=draft.place==='냉동'?freezeDays():c.d;
     $('exp').value=plus(days);
     $('expHint').textContent=`${draft.place==='냉동'?'냉동':c.k} 기준 ${days}일`;
@@ -1015,10 +1011,18 @@ function shrink(file,maxPx){
 
 /* ---------- 인식 ---------- */
 const CATLIST=CATS.map(c=>c.k).join(', ');
+const CATRULE='종류(cat)는 반드시 다음 중 하나: '+CATLIST+'. '+
+  '껌·사탕·과자·초콜릿·젤리·견과 간식은 과자·간식, 라면·통조림·즉석밥·레토르트·즉석식품은 가공식품. '+
+  '딱 맞는 게 없거나 애매하면 억지로 고르지 말고 기타. ';
 const P={
+  auto:'이 사진이 영수증·거래명세표인지, 식품(포장 제품 포함)인지 먼저 판단해줘. '+CATRULE+
+    'JSON 객체 하나만 출력해. 설명도 마크다운도 붙이지 마. '+
+    '영수증이면 {"type":"receipt","items":[{"name":"품목명 20자 이내","cat":"종류","days":보관 가능 일수 정수}]} — 합계·부가세·카드·매장명은 빼고 식품만, 줄임말은 풀어서. '+
+    '식품이면 {"type":"item","name":"포장의 제품명 또는 추정한 한국어 이름 12자 이내","cat":"종류","icon":"이모지 한 글자","days":보관 가능 일수 정수,"sure":0~1 소수}. '+
+    '둘 다 아니면 {"type":"none"}.',
   item:'이 사진 속 식품이 무엇인지 알려줘. 포장에 제품명이 있으면 그 이름을, 없으면 생김새로 추정한 한국어 이름을 써줘. '+
     'JSON 객체 하나만 출력해. 설명도 마크다운도 붙이지 마. '+
-    '{"name":"12자 이내","cat":"'+CATLIST+' 중 하나","icon":"이모지 한 글자","days":냉장 보관 가능 일수 정수,"sure":0~1 소수} '+
+    CATRULE+'{"name":"12자 이내","cat":"종류","icon":"이모지 한 글자","days":냉장 보관 가능 일수 정수,"sure":0~1 소수} '+
     '식품이 아니면 name을 빈 문자열로.',
   date:'이 사진에서 날짜를 읽어줘. 식품 포장의 유통기한, 소비기한, 품질유지기한을 찾는 게 목적이야. '+
     '제조일자와 유통기한이 둘 다 있으면 반드시 유통기한(또는 소비기한) 쪽을 골라. '+
@@ -1028,7 +1032,7 @@ const P={
   receipt:'이 영수증 또는 거래명세표에서 식품 품목만 뽑아줘. 합계·부가세·카드·매장명·전화번호 같은 건 제외해. '+
     '상품명이 줄임말이면 알아볼 수 있는 한국어 이름으로 풀어줘. '+
     'JSON 객체 하나만 출력해. 설명도 마크다운도 붙이지 마. '+
-    '{"items":[{"name":"품목명 20자 이내","cat":"'+CATLIST+' 중 하나","days":냉장 보관 가능 일수 정수}]} '+
+    CATRULE+'{"items":[{"name":"품목명 20자 이내","cat":"종류","days":냉장 보관 가능 일수 정수}]} '+
     '식품이 없으면 items를 빈 배열로.'
 };
 const parts=url=>[url.split(',')[1],(url.match(/^data:(image\/[a-z+]+);/)||[])[1]||'image/jpeg'];
@@ -1079,29 +1083,43 @@ async function ask(b64,mt,mode){
   return JSON.parse(t.replace(/```json|```/g,'').trim());
 }
 
-async function recognize(url){
-  const s=$('aiStat');
-  if(!canAI()){s.textContent='';return}
-  s.textContent='사진 보는 중…';
+/* 사진 속 식품 1개 인식. opts.barcodeName이 있으면 이름은 그대로 두고 종류·아이콘·기한만 채움 */
+async function recognize(url,opts){
+  const s=$('aiStat');opts=opts||{};
+  if(!canAI()){s.textContent=opts.barcodeName?`${opts.barcodeName} — 이제 유통기한을 찍어주세요`:'';return}
+  s.textContent=opts.barcodeName?`${opts.barcodeName} — 종류 알아보는 중…`:'사진 보는 중…';
   try{
     const [b64,mt]=parts(url);
     const j=await ask(b64,mt,'item');
-    if(!j.name){s.textContent='식품으로 보이지 않습니다';return}
-    if(!$('name').value)$('name').value=j.name;
-    if(!draft.cat){
-      const hit=[...$('cats').children].find(x=>x.textContent.endsWith(j.cat));
-      if(hit)hit.click();
-    }
-    if(j.icon&&!draft.icon){
-      draft.icon=j.icon;
-      pressOnly($('icons'),[...$('icons').children].find(x=>x.textContent===j.icon));
-    }
-    if(Number.isInteger(j.days)&&j.days>0&&!$('exp').value&&!(draft.cat&&custom[draft.cat]))$('exp').value=plus(j.days);
-    check();
-    const low=j.sure!==undefined&&j.sure<0.6;
-    s.textContent=(low?`${j.name} 같습니다. 확인해주세요`:`${j.name} 으로 채웠습니다`)+' → 이제 유통기한을 찍어주세요';
-    $('bDate').classList.add('hl');
-  }catch(e){s.textContent=`알아보지 못했습니다 — ${reasonOf(e)}`}
+    if(!j.name&&!opts.barcodeName){s.textContent='식품으로 보이지 않습니다';return}
+    applyItem(j,opts);
+  }catch(e){
+    s.textContent=opts.barcodeName
+      ?`${opts.barcodeName} — 종류는 직접 골라주세요 (${reasonOf(e)})`
+      :`알아보지 못했습니다 — ${reasonOf(e)}`;
+  }
+}
+function applyItem(j,opts){
+  opts=opts||{};
+  const s=$('aiStat');
+  if(j.name&&!$('name').value)$('name').value=j.name;
+  const c=catOf(j.cat);                       // 목록에 없는 종류는 기타
+  const iconWasSet=!!draft.icon;
+  if(!draft.cat){
+    const hit=[...$('cats').children].find(x=>x.textContent===`${c.e} ${c.k}`);
+    if(hit)hit.click();                        // 종류 아이콘이 자동으로 들어감
+  }
+  if(j.icon&&!iconWasSet&&c!==ETC){           // AI가 고른 아이콘이 목록에 있으면 그걸로
+    const ib=[...$('icons').children].find(x=>x.textContent===j.icon);
+    if(ib){draft.icon=j.icon;pressOnly($('icons'),ib)}
+  }
+  // 종류를 알면 종류 기본일수, 기타일 때만 AI 추정일수
+  if(draft.cat===ETC.k&&!custom[ETC.k]&&Number.isInteger(j.days)&&j.days>0)$('exp').value=plus(j.days);
+  check();
+  const nm=opts.barcodeName||j.name;
+  const low=!opts.barcodeName&&j.sure!==undefined&&j.sure<0.6;
+  s.textContent=(low?`${nm} 같습니다. 확인해주세요`:`${nm} · ${draft.cat||c.k}`)+' → 이제 유통기한을 찍어주세요';
+  $('bDate').classList.add('hl');
 }
 
 async function readDate(url){
@@ -1269,7 +1287,7 @@ function renderRec(){
   const tc=$('topCats');tc.innerHTML='';
   if(!top.length){const p=document.createElement('p');p.className='muted';p.textContent='버린 기록이 없습니다';tc.appendChild(p)}
   top.forEach(([k,n])=>{
-    const c=CATS.find(y=>y.k===k)||CATS[13];
+    const c=catOf(k);
     const r=document.createElement('div');r.className='lrow';
     const i=document.createElement('div');i.className='li';i.textContent=c.e;
     const mm=document.createElement('div');mm.className='lm';
@@ -1282,7 +1300,7 @@ function renderRec(){
   const ll=$('logList');ll.innerHTML='';
   if(!inMonth.length){const p=document.createElement('p');p.className='muted';p.textContent='이 달에 꺼낸 기록이 없습니다';ll.appendChild(p)}
   inMonth.slice().sort((a,b)=>String(b.at).localeCompare(String(a.at))||String(b.id).localeCompare(String(a.id))).forEach(x=>{
-    const c=CATS.find(y=>y.k===x.cat)||CATS[13];
+    const c=catOf(x.cat);
     const r=document.createElement('div');r.className='lrow';
     const i=document.createElement('div');i.className='li';i.textContent=x.icon||c.e;
     const mm=document.createElement('div');mm.className='lm';
