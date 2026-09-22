@@ -28,5 +28,59 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "찍어서 담기",
+      "short_name": "찍어담기",
+      "description": "카메라를 바로 열어 식품·바코드·영수증을 찍습니다",
+      "url": "./index.html?go=cam",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "말해서 담기",
+      "short_name": "말하기",
+      "description": "유통기한을 말하거나 택배 문자를 붙여넣어 담습니다",
+      "url": "./index.html?go=chat",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "장보기",
+      "short_name": "장보기",
+      "description": "장보기 목록과 마트에서 확인",
+      "url": "./index.html?go=shop",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "오늘 메뉴",
+      "short_name": "오늘 메뉴",
+      "description": "임박한 재료로 만들 메뉴 추천",
+      "url": "./index.html?go=menu",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
