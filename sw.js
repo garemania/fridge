@@ -1,9 +1,11 @@
 // 캐시 이름을 바꾸면 예전 캐시가 지워집니다
-const CACHE = 'fridge-v2';
+const CACHE = 'fridge-v3';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest'
+  './manifest.webmanifest',
+  './calendar.html',
+  './calendar.webmanifest'
 ];
 
 self.addEventListener('install', e => {
