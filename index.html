@@ -104,12 +104,18 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 .ghead i{flex:1;height:1px;background:var(--line);margin-left:2px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 @media(max-width:340px){.grid{grid-template-columns:repeat(3,1fr)}}
+.cell{position:relative;overflow:hidden;border-radius:16px;animation:pop .22s ease both}
+.eatbg{
+  position:absolute;inset:0;border-radius:16px;background:var(--brand);color:#fff;
+  display:flex;align-items:center;justify-content:flex-start;padding-left:9px;gap:3px;
+  font-size:12px;font-weight:700;opacity:0;pointer-events:none;white-space:nowrap;
+}
 .tile{
+  position:relative;width:100%;
   border:1px solid var(--line);background:var(--card);border-radius:16px;
   padding:7px 5px 10px;cursor:pointer;text-align:center;overflow:hidden;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
-  touch-action:pan-y;transition:transform .12s,box-shadow .18s,border-color .18s;
-  animation:pop .22s ease both;
+  touch-action:pan-y;transition:box-shadow .18s,border-color .18s;
 }
 @keyframes pop{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
 .tile:active{background:var(--fill);transform:scale(.96)}
@@ -925,9 +931,11 @@ function tileEl(it){
   const c=catOf(it.cat);
   const tone=it.n===null?'var(--l3)':it.n<0?'var(--gone)':it.n<=3?'var(--soon)':'var(--brandD)';
 
+  const cell=document.createElement('div');cell.className='cell';
+  const bg=document.createElement('div');bg.className='eatbg';bg.textContent='😋 먹음';
   const b=document.createElement('button');b.type='button';
   b.className='tile'+(it.n===null?'':it.n<0?' gone':it.n<=3?' soon':'');
-  b.style.animationDelay=Math.min(220,(tileEl.i=(tileEl.i||0)+1)*12)+'ms';
+  cell.style.animationDelay=Math.min(220,(tileEl.i=(tileEl.i||0)+1)*12)+'ms';
   const th=document.createElement('div');th.className='thumb';
   if(it.img){const im=document.createElement('img');im.src=it.img;im.alt='';th.appendChild(im)}
   else th.textContent=it.icon||c.e;
@@ -942,41 +950,66 @@ function tileEl(it){
   const sb=document.createElement('div');sb.className='tsub';
   sb.textContent=groupBy==='place'?c.k:(it.place||'냉장');
   b.append(th,nm,sb);
-  b.setAttribute('aria-label',`${it.name} ${bd.textContent} · 길게 누르면 꺼내기`);
+  b.setAttribute('aria-label',`${it.name} ${bd.textContent} · 옆으로 밀면 먹음, 길게 누르면 옮기기`);
+  cell.append(bg,b);
 
-  /* 누르면 수정 · 길게 누르면 끌기 모드(보관위치 이동 또는 꺼내기) · 그냥 떼면 취소
-     click 이벤트에 기대지 않는다 — 사진 없는 타일에서 길게 누르면 브라우저가
-     글자 선택으로 가로채 click이 오지 않거나 드래그가 취소되던 문제가 있었다 */
-  let timer=null,held=false,moved=false,killed=false,sx=0,sy=0,t0=0;
+  /* 한 번의 누름을 방향으로 나눈다
+     · 짧게 떼면 수정
+     · 가만히 420ms → 끌기 모드(보관위치 이동·꺼내기)
+     · 옆으로 밀면 먹음 처리 (세로로 밀면 평소대로 화면 스크롤)
+     click 이벤트는 쓰지 않는다 — 사진 없는 타일에서 브라우저가 가로채던 문제가 있었다 */
+  let timer=null,held=false,killed=false,lock=null,sx=0,sy=0,t0=0,dx=0;
   const clear=()=>{clearTimeout(timer);timer=null};
+  const slide=(x,anim)=>{
+    b.style.transition=anim?'transform .2s cubic-bezier(.32,.72,0,1)':'none';
+    b.style.transform=x?`translateX(${x}px)`:'';
+    cell.classList.toggle('sw',x>6);
+    bg.style.opacity=Math.min(1,Math.max(0,x/70));
+  };
   b.addEventListener('pointerdown',e=>{
     if(e.button&&e.button!==0)return;
-    held=false;moved=false;killed=false;sx=e.clientX;sy=e.clientY;t0=Date.now();
+    if(dragItem)return;
+    held=false;killed=false;lock=null;dx=0;sx=e.clientX;sy=e.clientY;t0=Date.now();
     try{b.setPointerCapture(e.pointerId)}catch(err){}   // 손가락이 타일 밖으로 나가도 계속 추적
     e.preventDefault();                                 // 글자 선택·기본 드래그 막기
     clear();
-    timer=setTimeout(()=>{held=true;startDrag(it,sx,sy)},420);
+    timer=setTimeout(()=>{if(lock)return;held=true;slide(0,false);startDrag(it,sx,sy)},420);
   });
   b.addEventListener('pointermove',e=>{
-    if(!held){
-      if(Math.abs(e.clientX-sx)>9||Math.abs(e.clientY-sy)>9){moved=true;clear()}
-      return;
+    if(held){e.preventDefault();moveGhost(e.clientX,e.clientY);return}
+    const mx=e.clientX-sx,my=e.clientY-sy;
+    if(!lock){
+      if(Math.abs(mx)<10&&Math.abs(my)<10)return;
+      lock=Math.abs(mx)>Math.abs(my)*1.3?'x':'y';       // 가로면 밀기, 세로면 스크롤
+      clear();
+      if(lock==='y'){killed=true;return}
     }
-    e.preventDefault();moveGhost(e.clientX,e.clientY);
+    if(lock!=='x')return;
+    e.preventDefault();
+    dx=Math.max(0,mx);                                   // 오른쪽으로만
+    slide(dx,false);
   });
   b.addEventListener('pointerup',()=>{
     clear();
-    if(held){held=false;endDrag();return}               // 놓은 칸의 동작
-    if(killed||moved)return;
-    if(Date.now()-t0<700)openSheet(it);                 // 짧게 누르면 수정
+    if(held){held=false;endDrag();return}                // 놓은 칸의 동작
+    if(lock==='x'){
+      const far=dx>Math.max(52,b.offsetWidth*.5);
+      if(far){
+        slide(b.offsetWidth+40,true);
+        setTimeout(()=>remove(it.id,'eat',1),150);       // 1개만 먹음 처리
+      }else slide(0,true);
+      return;
+    }
+    if(killed)return;
+    if(Date.now()-t0<700)openSheet(it);                  // 짧게 누르면 수정
   });
-  b.addEventListener('pointercancel',()=>{              // 스크롤 등으로 취소
-    clear();killed=true;
+  b.addEventListener('pointercancel',()=>{
+    clear();killed=true;slide(0,true);
     if(held){held=false;endDrag()}
   });
   b.addEventListener('contextmenu',e=>e.preventDefault());
   b.addEventListener('dragstart',e=>e.preventDefault());
-  return b;
+  return cell;
 }
 
 /* 꺼낼 때 먹음/버림을 고른다. 취소하면 목록에 그대로 남는다 */
