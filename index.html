@@ -113,6 +113,7 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 }
 @keyframes pop{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
 .tile:active{background:var(--fill);transform:scale(.96)}
+.tile *{pointer-events:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
 .tile.gone{border-color:color-mix(in srgb,var(--gone) 45%,var(--line))}
 .tile.gone .thumb{filter:saturate(.45) brightness(.92)}
 .tile.soon{border-color:color-mix(in srgb,var(--soon) 40%,var(--line))}
@@ -346,6 +347,8 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
   display:grid;place-items:center;font-size:28px;pointer-events:none;overflow:hidden;opacity:.95;
 }
 .ghost img{width:100%;height:100%;object-fit:cover}
+body.dragging{overflow:hidden;touch-action:none}
+body.dragging .tile{touch-action:none}
 .dropbar{
   position:fixed;left:12px;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:12;
   display:none;flex-direction:column;gap:8px;
@@ -787,6 +790,9 @@ let log=[],recMonth=null,whyId=null,whyCount=1;
 let shop=[],menus=[],chatBusy=false;
 
 const $=id=>document.getElementById(id);
+let openedAt=0;                      // 창이 열린 시각
+const justOpened=()=>Date.now()-openedAt<350;
+const markOpen=()=>{openedAt=Date.now()};
 const pad=n=>String(n).padStart(2,'0');
 const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
 const ymd=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
@@ -938,29 +944,38 @@ function tileEl(it){
   b.append(th,nm,sb);
   b.setAttribute('aria-label',`${it.name} ${bd.textContent} · 길게 누르면 꺼내기`);
 
-  /* 누르면 수정 · 길게 누르면 끌기 모드(보관위치 이동 또는 꺼내기) · 그냥 떼면 취소 */
-  let timer=null,long=false,held=false,sx=0,sy=0;
+  /* 누르면 수정 · 길게 누르면 끌기 모드(보관위치 이동 또는 꺼내기) · 그냥 떼면 취소
+     click 이벤트에 기대지 않는다 — 사진 없는 타일에서 길게 누르면 브라우저가
+     글자 선택으로 가로채 click이 오지 않거나 드래그가 취소되던 문제가 있었다 */
+  let timer=null,held=false,moved=false,killed=false,sx=0,sy=0,t0=0;
+  const clear=()=>{clearTimeout(timer);timer=null};
   b.addEventListener('pointerdown',e=>{
-    long=false;held=false;sx=e.clientX;sy=e.clientY;
+    if(e.button&&e.button!==0)return;
+    held=false;moved=false;killed=false;sx=e.clientX;sy=e.clientY;t0=Date.now();
     try{b.setPointerCapture(e.pointerId)}catch(err){}   // 손가락이 타일 밖으로 나가도 계속 추적
-    timer=setTimeout(()=>{held=true;long=true;startDrag(it,sx,sy)},450);
+    e.preventDefault();                                 // 글자 선택·기본 드래그 막기
+    clear();
+    timer=setTimeout(()=>{held=true;startDrag(it,sx,sy)},420);
   });
   b.addEventListener('pointermove',e=>{
     if(!held){
-      if(Math.abs(e.clientX-sx)>8||Math.abs(e.clientY-sy)>8)clearTimeout(timer);
+      if(Math.abs(e.clientX-sx)>9||Math.abs(e.clientY-sy)>9){moved=true;clear()}
       return;
     }
     e.preventDefault();moveGhost(e.clientX,e.clientY);
   });
-  const done=()=>{
-    clearTimeout(timer);
-    if(!held)return;
-    held=false;endDrag();         // 칸 위에서 떼면 그 칸의 동작, 아니면 아무 일 없음
-  };
-  b.addEventListener('pointerup',done);
-  b.addEventListener('pointercancel',done);
+  b.addEventListener('pointerup',()=>{
+    clear();
+    if(held){held=false;endDrag();return}               // 놓은 칸의 동작
+    if(killed||moved)return;
+    if(Date.now()-t0<700)openSheet(it);                 // 짧게 누르면 수정
+  });
+  b.addEventListener('pointercancel',()=>{              // 스크롤 등으로 취소
+    clear();killed=true;
+    if(held){held=false;endDrag()}
+  });
   b.addEventListener('contextmenu',e=>e.preventDefault());
-  b.addEventListener('click',()=>{if(!long)openSheet(it)});
+  b.addEventListener('dragstart',e=>e.preventDefault());
   return b;
 }
 
@@ -975,7 +990,8 @@ function askWhy(id){
   whyCount=1;
   $('whyQty').hidden=(it.qty||1)<=1;
   drawWhyQty(it);
-  $('whyBg').classList.add('on');$('why').classList.add('on');syncHistory();
+  markOpen();$('whyBg').classList.add('on');$('why').classList.add('on');syncHistory();
+
 }
 function drawWhyQty(it){
   const max=it.qty||1;
@@ -990,7 +1006,7 @@ function closeWhy(){$('whyBg').classList.remove('on');$('why').classList.remove(
 $('whyEat').onclick=()=>{const id=whyId,n=whyCount;closeWhy();remove(id,'eat',n)};
 $('whyToss').onclick=()=>{const id=whyId,n=whyCount;closeWhy();remove(id,'toss',n)};
 $('whyCancel').onclick=()=>{closeWhy();render()};
-$('whyBg').onclick=()=>{closeWhy();render()};
+$('whyBg').onclick=()=>{if(justOpened())return;closeWhy();render()};
 
 function remove(id,reason,count){
   const i=items.findIndex(x=>x.id===id);
@@ -1205,12 +1221,12 @@ function openSheet(it){
   pressOnly($('cats'),draft.cat?[...$('cats').children].find(x=>x.textContent.endsWith(draft.cat)):null);
   pressOnly($('icons'),draft.icon?[...$('icons').children].find(x=>x.textContent===draft.icon):null);
 
-  check();
+  check();markOpen();
   $('scrim').classList.add('on');$('sheet').classList.add('on');syncHistory();
 }
 function closeSheet(){$('scrim').classList.remove('on');$('sheet').classList.remove('on');editing=null;syncHistory()}
 $('cancel').onclick=closeSheet;
-$('scrim').onclick=closeSheet;
+$('scrim').onclick=()=>{if(!justOpened())closeSheet()};
 $('del').onclick=()=>{const id=editing&&editing.id;closeSheet();if(id)askWhy(id)};
 
 $('done').onclick=()=>{
@@ -1451,12 +1467,13 @@ $('q').addEventListener('input',e=>{query=e.target.value;render()});
 const SORTS={exp:'임박순',new:'최근순',name:'이름순'};
 function openSort(){
   [...$('sortList').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===sortBy?'true':'false'));
-  $('sortBg').classList.add('on');$('sortSheet').classList.add('on');syncHistory();
+  markOpen();$('sortBg').classList.add('on');$('sortSheet').classList.add('on');syncHistory();
+
 }
 function closeSort(){$('sortBg').classList.remove('on');$('sortSheet').classList.remove('on');syncHistory()}
 $('sortBtn').onclick=openSort;
 $('sortCancel').onclick=closeSort;
-$('sortBg').onclick=closeSort;
+$('sortBg').onclick=()=>{if(!justOpened())closeSort()};
 [...$('sortList').children].forEach(b=>{
   b.onclick=()=>{sortBy=b.dataset.s;$('sortLabel').textContent=SORTS[sortBy];closeSort();save();render()};
 });
@@ -1559,15 +1576,16 @@ const ymLabel=ym=>`${ym.slice(0,4)}년 ${+ym.slice(4,6)}월`;
 function openRec(){
   recMonth=ymKey(new Date());
   renderRec();
-  $('scrim').classList.add('on');$('rec').classList.add('on');syncHistory();
+  markOpen();$('scrim').classList.add('on');$('rec').classList.add('on');syncHistory();
+
 }
 function closeRec(){$('rec').classList.remove('on');$('scrim').classList.remove('on');showAlert();syncHistory()}
 $('bRec').onclick=openRec;
 $('recClose').onclick=closeRec;
-$('scrim').addEventListener('click',()=>{if($('rec').classList.contains('on'))closeRec()});
-$('scrim').addEventListener('click',()=>{if($('menu').classList.contains('on'))closeMenu()});
-$('scrim').addEventListener('click',()=>{if($('shop').classList.contains('on'))closeShopSheet()});
-$('scrim').addEventListener('click',()=>{if($('chat').classList.contains('on'))closeChat()});
+$('scrim').addEventListener('click',()=>{if(!justOpened()&&$('rec').classList.contains('on'))closeRec()});
+$('scrim').addEventListener('click',()=>{if(!justOpened()&&$('menu').classList.contains('on'))closeMenu()});
+$('scrim').addEventListener('click',()=>{if(!justOpened()&&$('shop').classList.contains('on'))closeShopSheet()});
+$('scrim').addEventListener('click',()=>{if(!justOpened()&&$('chat').classList.contains('on'))closeChat()});
 $('mPrev').onclick=()=>{recMonth=shiftYm(recMonth,-1);renderRec()};
 $('mNext').onclick=()=>{recMonth=shiftYm(recMonth,1);renderRec()};
 
@@ -1721,7 +1739,8 @@ function addShop(name){
 
 /* 오늘 메뉴 */
 function openMenu(){
-  $('scrim').classList.add('on');$('menu').classList.add('on');syncHistory();
+  markOpen();$('scrim').classList.add('on');$('menu').classList.add('on');syncHistory();
+
   if(!menus.length)askMenu();else drawMenus();
 }
 function closeMenu(){$('menu').classList.remove('on');$('scrim').classList.remove('on');syncHistory()}
@@ -1814,7 +1833,8 @@ function eatBatch(names){
 
 /* 장보기 */
 function openShopSheet(){
-  $('scrim').classList.add('on');$('shop').classList.add('on');
+  markOpen();$('scrim').classList.add('on');$('shop').classList.add('on');
+
   $('shopQ').value='';$('shopFind').innerHTML='';
   renderShop();syncHistory();
 }
@@ -1907,7 +1927,8 @@ function renderShop(){
 
 /* ---------- AI 대화창 ---------- */
 function openChat(){
-  $('scrim').classList.add('on');$('chat').classList.add('on');syncHistory();
+  markOpen();$('scrim').classList.add('on');$('chat').classList.add('on');syncHistory();
+
   if(!$('chatLog').children.length)chatSay('ai','유통기한을 말로 알려주거나, 택배 문자나 주문 내역을 그대로 붙여넣어 주세요.\n예) 우유 9월 30일까지, 삼겹살 600g 냉동');
   setTimeout(()=>$('chatInput').focus(),300);
 }
@@ -1990,8 +2011,11 @@ function drawPicks(list){
 
 /* ---------- 타일 드래그로 보관위치 옮기기 ---------- */
 let dragItem=null,ghost=null,dropOn=null;
+/* 끌고 가는 동안 손가락 움직임이 화면 스크롤로 넘어가지 않게 막는다 */
+window.addEventListener('touchmove',e=>{if(dragItem)e.preventDefault()},{passive:false});
 function startDrag(it,x,y){
   dragItem=it;hideToast();   // 토스트가 칸을 가리지 않게
+  document.body.classList.add('dragging');
   ghost=document.createElement('div');ghost.className='ghost';
   ghost.textContent=it.icon||catOf(it.cat).e;
   if(it.img){ghost.textContent='';const im=document.createElement('img');im.src=it.img;ghost.appendChild(im)}
@@ -2016,6 +2040,7 @@ function moveGhost(x,y){
 }
 function endDrag(){
   const it=dragItem,zone=dropOn;
+  document.body.classList.remove('dragging');
   if(ghost){ghost.remove();ghost=null}
   if(dropOn)dropOn.classList.remove('over');
   $('dropBar').classList.remove('on');
