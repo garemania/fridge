@@ -58,8 +58,9 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 /* 도구 줄 (거르기 · 묶기 · 정렬) */
 .toolbar{
   position:sticky;top:0;z-index:3;background:var(--card);
-  border-bottom:1px solid var(--line);padding:2px 0 10px;
+  border-bottom:1px solid var(--line);padding:2px 0 10px;transition:box-shadow .2s;
 }
+.toolbar.stuck{box-shadow:0 6px 16px rgba(0,0,0,.07)}
 .fchips{display:flex;gap:7px;padding:0 14px 9px;overflow-x:auto;scrollbar-width:none}
 .fchips::-webkit-scrollbar{display:none}
 .fchip{
@@ -87,7 +88,12 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
   display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;
   color:var(--l2);font-size:13.5px;padding:6px 4px;cursor:pointer;flex:0 0 auto;
 }
+
 .sortbtn svg{width:16px;height:16px;fill:var(--l3)}
+.iconbtn{border:0;background:transparent;padding:6px;border-radius:9px;cursor:pointer;line-height:0;flex:0 0 auto}
+.iconbtn svg{width:19px;height:19px;fill:var(--l3)}
+.iconbtn:active{background:var(--fill)}
+.iconbtn[aria-pressed="true"] svg{fill:var(--brandD)}
 .sortbtn:active{opacity:.6}
 .sortlist{display:flex;flex-direction:column;gap:7px}
 .sortlist button{
@@ -129,9 +135,9 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 }
 .thumb img{width:100%;height:100%;object-fit:cover}
 .tbadge{
-  position:absolute;top:4px;right:4px;color:#fff;font-size:10px;font-weight:800;
+  position:absolute;top:11px;right:9px;color:#fff;font-size:10px;font-weight:800;
   padding:2px 6px;border-radius:999px;font-variant-numeric:tabular-nums;line-height:1.35;
-  box-shadow:0 1px 4px rgba(0,0,0,.22);
+  box-shadow:0 1px 4px rgba(0,0,0,.22);z-index:1;
 }
 .tqty{
   position:absolute;left:4px;bottom:4px;background:rgba(20,26,22,.74);color:#fff;
@@ -139,6 +145,17 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-
 }
 .tname{font-size:12.5px;font-weight:600;margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.02em}
 .tsub{font-size:10.5px;color:var(--l3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 목록 보기 */
+body.rows .grid{display:flex;flex-direction:column;gap:7px}
+body.rows .cell{border-radius:14px}
+body.rows .tile{display:flex;align-items:center;gap:12px;text-align:left;padding:9px 12px;border-radius:14px}
+body.rows .thumb{width:48px;height:48px;flex:0 0 48px;aspect-ratio:auto;border-radius:11px;font-size:24px}
+body.rows .tmeta{flex:1;min-width:0}
+body.rows .tname{margin-top:0;font-size:15px}
+body.rows .tsub{font-size:12px}
+body.rows .tbadge{position:static;margin-left:auto;font-size:11px;padding:4px 9px;box-shadow:none}
+body.rows .eatbg{font-size:13px;padding-left:14px}
 
 /* 빈 화면 */
 .empty{text-align:center;color:var(--l3);padding:56px 24px;font-size:15px;line-height:1.7;white-space:pre-line}
@@ -473,6 +490,9 @@ body.dragging .tile{touch-action:none}
       <button type="button" data-g="cat" aria-pressed="false">종류</button>
       <button type="button" data-g="none" aria-pressed="false">전체</button>
     </div>
+    <button class="iconbtn" id="denseBtn" aria-label="칸·목록 보기 바꾸기" aria-pressed="false">
+      <svg viewBox="0 0 24 24"><path d="M3 4h7v7H3V4zm11 0h7v7h-7V4zM3 13h7v7H3v-7zm11 0h7v7h-7v-7z"/></svg>
+    </button>
     <button class="sortbtn" id="sortBtn" aria-haspopup="true">
       <svg viewBox="0 0 24 24"><path d="M3 6h12v2H3V6zm0 5h9v2H3v-2zm0 5h6v2H3v-2zm15.5-9.5L22 10h-2.5v8h-2v-8H15l3.5-3.5z"/></svg>
       <span id="sortLabel">임박순</span>
@@ -581,7 +601,9 @@ body.dragging .tile{touch-action:none}
     <div class="field">
       <div class="lab">유통기한</div>
       <input type="text" class="tf" id="exp" inputmode="numeric" placeholder="20260907" maxlength="8" autocomplete="off">
+      <input type="date" id="expCal" hidden>
       <div class="quick">
+        <button type="button" id="bCal">📅 달력</button>
         <button data-d="1">내일</button>
         <button data-d="3">3일</button>
         <button data-d="7">1주</button>
@@ -606,6 +628,19 @@ body.dragging .tile{touch-action:none}
 
     <button class="danger" id="del" hidden>꺼내기</button>
   </div>
+</div>
+
+<!-- 빠른 작업 -->
+<div class="whybg" id="quickBg"></div>
+<div class="why" id="quickSheet" role="dialog" aria-label="빠르게 담기">
+  <h2>빠르게 담기</h2>
+  <p>어떻게 넣을까요</p>
+  <div class="sortlist">
+    <button type="button" id="qCam">📷  찍어서 담기</button>
+    <button type="button" id="qChat">💬  말하거나 택배 문자 붙여넣기</button>
+    <button type="button" id="qManual">✏️  직접 입력하기</button>
+  </div>
+  <button class="whycancel" id="quickCancel">닫기</button>
 </div>
 
 <!-- 정렬 고르기 -->
@@ -789,7 +824,7 @@ function applyDays(){CATS.forEach(c=>{c.d=custom[c.k]||DEF_DAYS[c.k]})}
 /* 인식 서버 주소. 비워두면 수동 입력만 됩니다. */
 const WORKER='https://fridge-ai.garemania575.workers.dev';
 
-let items=[],filter='all',query='',sortBy='exp',groupBy='place',editing=null,undoItem=null;
+let items=[],filter='all',query='',sortBy='exp',groupBy='place',rows=false,editing=null,undoItem=null;
 let draft={img:null,cat:null,icon:null,place:'냉장',qty:1};
 let foundList=[],capBusy=false;
 let log=[],recMonth=null,whyId=null,whyCount=1;
@@ -835,9 +870,11 @@ async function load(){
   try{
     const v=JSON.parse(await sget(VIEWKEY)||'{}');
     if(['place','cat','none'].includes(v.group))groupBy=v.group;
+    rows=!!v.rows;
     if(['exp','new','name'].includes(v.sort))sortBy=v.sort;
   }catch(e){}
   $('sortLabel').textContent=SORTS[sortBy];
+  setDense();
   applyDays();
   render();
   showAlert();
@@ -851,7 +888,7 @@ function save(){
       await sset(LOGKEY,JSON.stringify(log));
       await sset(DAYSKEY,JSON.stringify(custom));
       await sset(SHOPKEY,JSON.stringify(shop));
-      await sset(VIEWKEY,JSON.stringify({group:groupBy,sort:sortBy}));
+      await sset(VIEWKEY,JSON.stringify({group:groupBy,sort:sortBy,rows}));
     }catch(e){toast('저장 공간이 부족합니다. 오래된 항목을 꺼내주세요')}
   },250);
 }
@@ -942,14 +979,16 @@ function tileEl(it){
 
   const bd=document.createElement('span');bd.className='tbadge';bd.style.background=tone;
   bd.textContent=it.n===null?'—':it.n<0?`+${-it.n}`:it.n===0?'오늘':`D-${it.n}`;
-  th.appendChild(bd);
 
   if((it.qty||1)>1){const q=document.createElement('span');q.className='tqty';q.textContent=`×${it.qty}`;th.appendChild(q)}
 
   const nm=document.createElement('div');nm.className='tname';nm.textContent=it.name;
   const sb=document.createElement('div');sb.className='tsub';
-  sb.textContent=groupBy==='place'?c.k:(it.place||'냉장');
-  b.append(th,nm,sb);
+  sb.textContent=rows
+    ? [it.place||'냉장',c.k,it.exp?`${pretty(it.exp)}까지`:'기한 없음'].join(' · ')
+    : (groupBy==='place'?c.k:(it.place||'냉장'));
+  const meta=document.createElement('div');meta.className='tmeta';meta.append(nm,sb);
+  b.append(th,meta,bd);
   b.setAttribute('aria-label',`${it.name} ${bd.textContent} · 옆으로 밀면 먹음, 길게 누르면 옮기기`);
   cell.append(bg,b);
 
@@ -1074,7 +1113,6 @@ function openCap(){
 function closeCap(){$('cap').classList.remove('on');syncHistory()}
 function setBusy(on){capBusy=on;$('shutter').disabled=on;$('capAlb').disabled=on}
 $('capX').onclick=closeCap;
-$('fab').onclick=openCap;
 $('capManual').onclick=()=>{closeCap();openSheet(null)};
 $('shutter').onclick=()=>{if(!capBusy)openPicker('fCap')};
 $('capAlb').onclick=()=>{if(!capBusy)openPicker('fCapAlb')};
@@ -1228,9 +1266,20 @@ ICONS.forEach(ic=>{
   b.onclick=()=>{draft.icon=ic;pressOnly($('icons'),b)};
   $('icons').appendChild(b);
 });
-document.querySelectorAll('.quick button').forEach(b=>{
+document.querySelectorAll('.quick button[data-d]').forEach(b=>{
   b.onclick=()=>{$('exp').value=plus(+b.dataset.d);$('expHint').textContent='';check()};
 });
+/* 달력에서 고르기 */
+$('bCal').onclick=()=>{
+  const v=$('exp').value;
+  $('expCal').value=v.length===8?`${v.slice(0,4)}-${v.slice(4,6)}-${v.slice(6,8)}`:ymd(today()).replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3');
+  const el=$('expCal');
+  try{el.showPicker?el.showPicker():el.click()}catch(e){el.click()}
+};
+$('expCal').onchange=e=>{
+  const d=(e.target.value||'').replace(/-/g,'');
+  if(d.length===8){$('exp').value=d;$('expHint').textContent='';check()}
+};
 $('qtyM').onclick=()=>{draft.qty=Math.max(1,draft.qty-1);$('qty').textContent=draft.qty};
 $('qtyP').onclick=()=>{draft.qty=Math.min(99,draft.qty+1);$('qty').textContent=draft.qty};
 
@@ -1505,6 +1554,23 @@ function openSort(){
 }
 function closeSort(){$('sortBg').classList.remove('on');$('sortSheet').classList.remove('on');syncHistory()}
 $('sortBtn').onclick=openSort;
+
+/* + 버튼: 누르면 촬영, 길게 누르면 빠른 작업 */
+function openQuick(){markOpen();$('quickBg').classList.add('on');$('quickSheet').classList.add('on');syncHistory()}
+function closeQuick(){$('quickBg').classList.remove('on');$('quickSheet').classList.remove('on');syncHistory()}
+$('quickCancel').onclick=closeQuick;
+$('quickBg').onclick=()=>{if(!justOpened())closeQuick()};
+$('qCam').onclick=()=>{closeQuick();openCap()};
+$('qChat').onclick=()=>{closeQuick();openChat()};
+$('qManual').onclick=()=>{closeQuick();openSheet(null)};
+(()=>{
+  const fab=$('fab');let t=null,long=false;
+  fab.addEventListener('pointerdown',()=>{long=false;t=setTimeout(()=>{long=true;if(navigator.vibrate)navigator.vibrate(12);openQuick()},420)});
+  const off=()=>clearTimeout(t);
+  fab.addEventListener('pointerup',off);fab.addEventListener('pointercancel',off);fab.addEventListener('pointerleave',off);
+  fab.addEventListener('contextmenu',e=>e.preventDefault());
+  fab.onclick=()=>{if(!long)openCap()};
+})();
 $('sortCancel').onclick=closeSort;
 $('sortBg').onclick=()=>{if(!justOpened())closeSort()};
 [...$('sortList').children].forEach(b=>{
@@ -1513,6 +1579,16 @@ $('sortBg').onclick=()=>{if(!justOpened())closeSort()};
 [...$('groupSeg').children].forEach(b=>{
   b.onclick=()=>{groupBy=b.dataset.g;save();render();window.scrollTo({top:0,behavior:'smooth'})};
 });
+const ICON_GRID='<svg viewBox="0 0 24 24"><path d="M3 4h7v7H3V4zm11 0h7v7h-7V4zM3 13h7v7H3v-7zm11 0h7v7h-7v-7z"/></svg>';
+const ICON_ROWS='<svg viewBox="0 0 24 24"><path d="M3 5h4v4H3V5zm6 1h12v2H9V6zM3 11h4v4H3v-4zm6 1h12v2H9v-2zM3 17h4v4H3v-4zm6 1h12v2H9v-2z"/></svg>';
+function setDense(){
+  document.body.classList.toggle('rows',rows);
+  const b=$('denseBtn');
+  b.setAttribute('aria-pressed',rows?'true':'false');
+  b.innerHTML=rows?ICON_GRID:ICON_ROWS;       // 누르면 바뀔 모양을 보여준다
+  b.setAttribute('aria-label',rows?'칸 보기로 바꾸기':'목록 보기로 바꾸기');
+}
+$('denseBtn').onclick=()=>{rows=!rows;setDense();save();render()};
 /* 아래 탭 */
 function setTab(){
   const on=$('shop').classList.contains('on')?'bShop'
@@ -2099,6 +2175,7 @@ function endDrag(){
 const LAYERS=[   // 위에 떠 있는 순서
   {open:()=>$('why').classList.contains('on'),close:()=>{closeWhy();render()}},
   {open:()=>$('sortSheet').classList.contains('on'),close:()=>closeSort()},
+  {open:()=>$('quickSheet').classList.contains('on'),close:()=>closeQuick()},
   {open:()=>$('cap').classList.contains('on'),close:()=>closeCap()},
   {open:()=>$('sheet').classList.contains('on'),close:()=>closeSheet()},
   {open:()=>$('menu').classList.contains('on'),close:()=>closeMenu()},
@@ -2118,6 +2195,14 @@ function syncHistory(){
     else if(!open&&guarded){guarded=false;skipPop=true;history.back()}
   },0);
 }
+// 스크롤하면 도구 줄에 그림자
+let lastY=0;
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY||0;
+  if((y>6)!==(lastY>6))document.querySelector('.toolbar').classList.toggle('stuck',y>6);
+  lastY=y;
+},{passive:true});
+
 window.addEventListener('popstate',()=>{
   if(skipPop){skipPop=false;return}
   guarded=false;
