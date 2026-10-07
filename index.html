@@ -319,6 +319,15 @@ body.rows .eatbg{font-size:13px;padding-left:14px}
 .whyqty .stepper button{width:44px;padding:8px 0}
 .whyqty a{color:var(--brandD);font-weight:600;text-decoration:none;cursor:pointer}
 
+/* 저장 실패 경고 */
+.savewarn{
+  display:none;margin:12px 12px 0;background:var(--gone);color:#fff;
+  border-radius:12px;padding:11px 12px;gap:10px;align-items:center;font-size:13.5px;line-height:1.45;
+}
+.savewarn.on{display:flex}
+.savewarn span{flex:1}
+.savewarn button{border:0;background:rgba(255,255,255,.22);color:#fff;font-weight:700;border-radius:9px;padding:7px 11px;font-size:13px;cursor:pointer;flex:0 0 auto}
+
 /* 임박 알림 배너 */
 .alert{display:none;margin:12px 12px 0;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--soon);border-radius:12px;padding:11px 12px 11px 13px;gap:10px;align-items:flex-start}
 .alert.on{display:flex}
@@ -481,7 +490,7 @@ body.dragging .tile{touch-action:none}
 <div class="toolbar">
   <div class="fchips" id="filterRow" role="group" aria-label="거르기">
     <button class="fchip" type="button" data-f="all" aria-pressed="true">전체 <b id="nAll">0</b></button>
-    <button class="fchip s" type="button" data-f="soon" aria-pressed="false">임박 <b id="nSoon">0</b></button>
+    <button class="fchip s" type="button" data-f="soon" aria-pressed="false"><span id="soonLabel">임박</span> <b id="nSoon">0</b></button>
     <button class="fchip g" type="button" data-f="gone" aria-pressed="false">만료 <b id="nGone">0</b></button>
   </div>
   <div class="viewrow">
@@ -498,6 +507,11 @@ body.dragging .tile{touch-action:none}
       <span id="sortLabel">임박순</span>
     </button>
   </div>
+</div>
+
+<div class="savewarn" id="saveWarn" role="alert">
+  <span>저장 공간이 부족해 방금 바뀐 내용이 저장되지 않았습니다</span>
+  <button id="saveFix">정리하기</button>
 </div>
 
 <div class="alert" id="alert" role="status">
@@ -781,6 +795,22 @@ body.dragging .tile{touch-action:none}
     </div>
 
     <div class="sec">
+      <h3>임박 기준</h3>
+      <div class="drow">
+        <span class="de">⏰</span>
+        <span class="dn">임박으로 볼 기간<small>기본 3일</small></span>
+        <input type="number" id="soonDays" inputmode="numeric" min="1" max="30" aria-label="임박 기준 일수">
+        <span class="du">일</span>
+      </div>
+    </div>
+
+    <div class="sec" id="spaceSec">
+      <h3>저장 공간 <span style="font-weight:400">· 폰 브라우저 안에만 저장됩니다</span></h3>
+      <div id="spaceInfo" class="hint"></div>
+      <button class="bk" id="bPhotoClean">오래된 사진 비우기</button>
+    </div>
+
+    <div class="sec">
       <h3>데이터 백업</h3>
       <button class="bk main" id="bExport">백업 파일 저장</button>
       <div class="bkrow">
@@ -815,6 +845,8 @@ const SHOPKEY='fridge-shop';
 const VIEWKEY='fridge-view';
 const DAYSKEY='fridge-days';
 const ALERTKEY='fridge-alert-hidden';
+const SOONKEY='fridge-soon';
+let soonDays=3;                      // 며칠 안을 '임박'으로 볼지
 const DEF_DAYS=Object.fromEntries(CATS.map(c=>[c.k,c.d]));
 const DEF_FREEZE=90;
 let custom={};            // 사용자가 바꾼 보관일수만 담음 {종류:일수, '냉동':일수}
@@ -867,6 +899,7 @@ async function load(){
   try{log=JSON.parse(await sget(LOGKEY)||'[]');if(!Array.isArray(log))log=[]}catch(e){log=[]}
   try{custom=cleanDays(JSON.parse(await sget(DAYSKEY)||'{}'))}catch(e){custom={}}
   try{shop=JSON.parse(await sget(SHOPKEY)||'[]');if(!Array.isArray(shop))shop=[]}catch(e){shop=[]}
+  try{const s=parseInt(await sget(SOONKEY),10);if(s>=1&&s<=30)soonDays=s}catch(e){}
   try{
     const v=JSON.parse(await sget(VIEWKEY)||'{}');
     if(['place','cat','none'].includes(v.group))groupBy=v.group;
@@ -882,15 +915,46 @@ async function load(){
 let sv=null;
 function save(){
   clearTimeout(sv);
-  sv=setTimeout(async()=>{
-    try{
-      await sset(KEY,JSON.stringify(items));
-      await sset(LOGKEY,JSON.stringify(log));
-      await sset(DAYSKEY,JSON.stringify(custom));
-      await sset(SHOPKEY,JSON.stringify(shop));
-      await sset(VIEWKEY,JSON.stringify({group:groupBy,sort:sortBy,rows}));
-    }catch(e){toast('저장 공간이 부족합니다. 오래된 항목을 꺼내주세요')}
-  },250);
+  sv=setTimeout(doSave,250);
+}
+async function doSave(){
+  clearTimeout(sv);
+  let bad=null;
+  for(const [k,v] of [[KEY,items],[LOGKEY,log],[DAYSKEY,custom],[SHOPKEY,shop],
+                      [VIEWKEY,{group:groupBy,sort:sortBy,rows}]]){
+    try{await sset(k,JSON.stringify(v))}catch(e){bad=bad||k}   // 하나 실패해도 나머지는 저장
+  }
+  setSaveWarn(bad===KEY||bad===LOGKEY);    // 목록·기록이 안 들어가면 경고
+  return !bad;
+}
+/* 저장이 막히면 화면에 띠로 알린다 — 저장된 줄 알고 앱을 닫는 일이 없게 */
+function setSaveWarn(on){
+  const w=$('saveWarn');
+  w.classList.toggle('on',!!on);
+  if(on)w.scrollIntoView&&0;
+}
+$('saveFix').onclick=()=>{openRec();setTimeout(()=>{const s=$('spaceSec');s&&s.scrollIntoView({behavior:'smooth',block:'center'})},400)};
+
+/* 저장 공간 */
+function usedBytes(){
+  try{
+    return [KEY,LOGKEY,SHOPKEY,DAYSKEY].reduce((n,k)=>{
+      const v=k===KEY?JSON.stringify(items):k===LOGKEY?JSON.stringify(log):k===SHOPKEY?JSON.stringify(shop):JSON.stringify(custom);
+      return n+v.length;
+    },0);
+  }catch(e){return 0}
+}
+const kb=n=>n<1024?`${n}B`:n<1024*1024?`${(n/1024).toFixed(0)}KB`:`${(n/1048576).toFixed(1)}MB`;
+
+/* 이름·보관위치·유통기한이 같으면 새로 만들지 않고 수량을 더한다 */
+function addOrMerge(o){
+  const i=items.findIndex(x=>x.name===o.name&&(x.place||'냉장')===(o.place||'냉장')&&(x.exp||'')===(o.exp||''));
+  if(i>=0){
+    items[i]={...items[i],qty:Math.min(99,(items[i].qty||1)+(o.qty||1))};
+    return 'merged';
+  }
+  items.push({id:newId(),qty:1,...o});
+  return 'added';
 }
 
 /* ---------- 목록 (칸 보기) ---------- */
@@ -907,16 +971,17 @@ function render(){
   const host=$('list');host.innerHTML='';
   const all=items.map(i=>({...i,n:left(i.exp)}));
 
-  const soon=all.filter(i=>i.n!==null&&i.n>=0&&i.n<=3).length;
+  const soon=all.filter(i=>i.n!==null&&i.n>=0&&i.n<=soonDays).length;
   const gone=all.filter(i=>i.n!==null&&i.n<0).length;
   $('nSoon').textContent=soon;$('nGone').textContent=gone;$('nAll').textContent=all.length;
   [...$('filterRow').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===filter?'true':'false'));
+  $('soonLabel').textContent=`${soonDays}일 안`;
   [...$('groupSeg').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===groupBy?'true':'false'));
 
   const q=query.trim();
   let view=all.filter(i=>{
     const okF=filter==='all'
-      ||(filter==='soon'&&i.n!==null&&i.n>=0&&i.n<=3)
+      ||(filter==='soon'&&i.n!==null&&i.n>=0&&i.n<=soonDays)
       ||(filter==='gone'&&i.n!==null&&i.n<0);
     const okQ=!q||i.name.includes(q)||(i.cat||'').includes(q)||(i.place||'').includes(q);
     return okF&&okQ;
@@ -966,19 +1031,26 @@ function introEl(){
 }
 function tileEl(it){
   const c=catOf(it.cat);
-  const tone=it.n===null?'var(--l3)':it.n<0?'var(--gone)':it.n<=3?'var(--soon)':'var(--brandD)';
+  const tone=it.n===null?'var(--l3)':it.n<0?'var(--gone)':it.n<=soonDays?'var(--soon)':'var(--brandD)';
 
   const cell=document.createElement('div');cell.className='cell';
   const bg=document.createElement('div');bg.className='eatbg';bg.textContent='😋 먹음';
   const b=document.createElement('button');b.type='button';
-  b.className='tile'+(it.n===null?'':it.n<0?' gone':it.n<=3?' soon':'');
+  b.className='tile'+(it.n===null?'':it.n<0?' gone':it.n<=soonDays?' soon':'');
   cell.style.animationDelay=Math.min(220,(tileEl.i=(tileEl.i||0)+1)*12)+'ms';
-  const th=document.createElement('div');th.className='thumb';
-  if(it.img){const im=document.createElement('img');im.src=it.img;im.alt='';th.appendChild(im)}
-  else th.textContent=it.icon||c.e;
-
   const bd=document.createElement('span');bd.className='tbadge';bd.style.background=tone;
   bd.textContent=it.n===null?'—':it.n<0?`+${-it.n}`:it.n===0?'오늘':`D-${it.n}`;
+  const th=document.createElement('div');th.className='thumb';
+  if(it.img){
+    const im=document.createElement('img');im.src=it.img;im.alt='';
+    im.onerror=()=>{                                   // 사진이 깨지면 아이콘으로
+      im.remove();
+      const s=document.createElement('span');s.textContent=it.icon||c.e;th.prepend(s);
+    };
+    th.appendChild(im);
+  }
+  else th.textContent=it.icon||c.e;
+
 
   if((it.qty||1)>1){const q=document.createElement('span');q.className='tqty';q.textContent=`×${it.qty}`;th.appendChild(q)}
 
@@ -1209,12 +1281,14 @@ function drawFound(){
 $('capAdd').onclick=()=>{
   const pick=foundList.filter(x=>x.on);
   if(!pick.length){closeCap();return}
+  let merged=0;
   pick.forEach(x=>{
     const c=catOf(x.cat);
-    items.push({id:newId(),name:x.name,cat:c.k,exp:plus(receiptDays(x)),
-      img:null,icon:c.e,place:c.place||'냉장',qty:1});
+    if(addOrMerge({name:x.name,cat:c.k,exp:plus(receiptDays(x)),
+      img:null,icon:c.e,place:c.place||'냉장',qty:1})==='merged')merged++;
   });
-  save();render();closeCap();toast(`${pick.length}개를 담았습니다`);
+  save();render();closeCap();
+  toast(merged?`${pick.length}개를 담았습니다 (${merged}개는 기존 것에 합침)`:`${pick.length}개를 담았습니다`);
 };
 
 /* ---------- 선택 칩 ---------- */
@@ -1324,7 +1398,8 @@ $('done').onclick=()=>{
     if(i>=0)items[i]={...items[i],...data};
     toast('수정했습니다');
   }else{
-    items.push({id:newId(),...data});toast('넣었습니다');
+    const r=addOrMerge(data);
+    toast(r==='merged'?'같은 상품이 있어 수량을 더했습니다':'넣었습니다');
   }
   save();render();closeSheet();showAlert();
 };
@@ -1671,6 +1746,13 @@ function renderDays(){
     row.append(e,n,inp,u);host.appendChild(row);
   });
 }
+$('soonDays').onchange=async e=>{
+  const v=parseInt(e.target.value,10);
+  if(!(v>=1&&v<=30)){e.target.value=soonDays;toast('1~30일 사이로 적어주세요');return}
+  soonDays=v;
+  try{await sset(SOONKEY,String(v))}catch(err){}
+  render();showAlert();toast(`${v}일 안쪽을 임박으로 봅니다`);
+};
 $('bDaysReset').onclick=()=>{
   if(!Object.keys(custom).length){toast('이미 기본값입니다');return}
   if(!confirm('종류별 보관일수를 모두 기본값으로 되돌릴까요?'))return;
@@ -1771,8 +1853,35 @@ function renderRec(){
   });
 
   renderDays();
+  $('soonDays').value=soonDays;
+  renderSpace();
   showBackupInfo();
 }
+
+/* 사진이 공간의 대부분을 차지한다 */
+function renderSpace(){
+  const withImg=items.filter(i=>i.img);
+  const imgBytes=withImg.reduce((n,i)=>n+i.img.length,0);
+  $('spaceInfo').textContent=
+    `쓰는 중 ${kb(usedBytes())} · 상품 ${items.length}개 (사진 ${withImg.length}장, ${kb(imgBytes)}) · 기록 ${log.length}건`;
+  $('bPhotoClean').disabled=!withImg.length;
+}
+$('bPhotoClean').onclick=async()=>{
+  const old=items.filter(i=>i.img&&left(i.exp)!==null&&left(i.exp)<=0);
+  const target=old.length?old:items.filter(i=>i.img);
+  if(!target.length){toast('비울 사진이 없습니다');return}
+  const msg=old.length
+    ? `유통기한이 지난 ${old.length}개의 사진을 지울까요? (상품은 그대로 남습니다)`
+    : `사진 ${target.length}장을 모두 지울까요? (상품은 그대로 남습니다)`;
+  if(!confirm(msg))return;
+  const backup=target.map(i=>({id:i.id,img:i.img}));
+  target.forEach(i=>{const j=items.findIndex(x=>x.id===i.id);if(j>=0)items[j]={...items[j],img:null}});
+  await doSave();render();renderSpace();
+  toast(`사진 ${backup.length}장을 지웠습니다`,async()=>{
+    backup.forEach(bk=>{const j=items.findIndex(x=>x.id===bk.id);if(j>=0)items[j]={...items[j],img:bk.img}});
+    await doSave();render();renderSpace();
+  });
+};
 
 /* ---------- 백업 · 복원 ---------- */
 async function showBackupInfo(){
@@ -2103,13 +2212,14 @@ function drawPicks(list){
   btn.onclick=()=>{
     const pick=list.filter(x=>x.on!==false);
     if(!pick.length){toast('고른 항목이 없습니다');return}
-    pick.forEach(x=>items.push({id:newId(),name:x.name,cat:x.cat,exp:x.exp,img:null,icon:x.icon,place:x.place,qty:x.qty}));
+    const before=items.map(x=>({...x}));   // 되돌리기용
+    let merged=0;
+    pick.forEach(x=>{if(addOrMerge({name:x.name,cat:x.cat,exp:x.exp,img:null,icon:x.icon,place:x.place,qty:x.qty})==='merged')merged++});
     save();render();showAlert();
-    btn.disabled=true;btn.textContent=`${pick.length}개 담았습니다`;
+    btn.disabled=true;btn.textContent=merged?`${pick.length}개 담음 (${merged}개 합침)`:`${pick.length}개 담았습니다`;
     card.querySelectorAll('input').forEach(i=>i.disabled=true);
     toast(`${pick.length}개를 담았습니다`,()=>{
-      const ids=items.slice(-pick.length).map(i=>i.id);
-      items=items.filter(i=>!ids.includes(i.id));save();render();
+      items=before;save();render();showAlert();
       btn.disabled=false;btn.textContent='담기';
       card.querySelectorAll('input').forEach(i=>i.disabled=false);
     });
