@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>캘린더</title>
+<link rel="manifest" href="calendar.webmanifest">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="캘린더">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#F7F8F7; --card:#FFF; --line:#E8EAE9;
+  --l1:#17201B; --l2:#78837D; --l3:#B4BCB7;
+  --fill:rgba(120,131,125,.1);
+  --brand:#22C55E; --brandD:#16A34A;
+  --sun:#EF4444; --sat:#3B82F6; --soon:#E8850C;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#000; --card:#141714; --line:#242825;
+    --l1:#F2F5F3; --l2:#8A938E; --l3:#5A625D;
+    --fill:rgba(120,131,125,.2);
+    --brand:#30D158; --brandD:#28B84C;
+    --sun:#FF5A50; --sat:#5AA2FF; --soon:#FF9F0A;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overscroll-behavior-y:none}
+body{
+  background:var(--bg);color:var(--l1);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Apple SD Gothic Neo",system-ui,"Noto Sans KR",sans-serif;
+  font-size:16px;line-height:1.4;letter-spacing:-.015em;
+  padding-bottom:calc(100px + env(safe-area-inset-bottom));
+}
+button,input,select,textarea{font-family:inherit;color:inherit;font-size:16px}
+button{cursor:pointer}
+input:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* 상단바 */
+.top{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:calc(12px + env(safe-area-inset-top)) 12px 12px 16px;
+  background:var(--card);border-bottom:1px solid var(--line);
+}
+.top h1{font-size:19px;font-weight:700;margin:0;font-variant-numeric:tabular-nums}
+.top h1 button{border:0;background:transparent;font:inherit;padding:0}
+.nav{display:flex;align-items:center;gap:2px}
+.ib{border:0;background:transparent;padding:7px;border-radius:9px;line-height:0}
+.ib:active{background:var(--fill)}
+.ib svg{width:21px;height:21px;fill:var(--l1)}
+.pill{border:0;background:var(--fill);border-radius:99px;padding:6px 12px;font-size:14px;font-weight:600}
+.pill:active{opacity:.7}
+a.pill{color:var(--l1);text-decoration:none}
+
+/* 달력 */
+.cal{background:var(--card);border-bottom:1px solid var(--line);padding:0 6px 8px;touch-action:pan-y}
+.wk,.days{display:grid;grid-template-columns:repeat(7,1fr)}
+.wk div{text-align:center;font-size:12px;font-weight:600;color:var(--l2);padding:9px 0 6px}
+.wk div:first-child{color:var(--sun)}
+.wk div:last-child{color:var(--sat)}
+.day{
+  border:0;background:transparent;border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  min-height:64px;padding:5px 1px 4px;min-width:0;
+}
+.day:active{background:var(--fill)}
+.day .n{
+  width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  font-size:15px;font-variant-numeric:tabular-nums;
+}
+.day.sun .n,.day.hol .n{color:var(--sun)}
+.day.sat .n{color:var(--sat)}
+.day.out{opacity:.35}
+.day.today .n{background:var(--brand);color:#fff;font-weight:700}
+.day[aria-selected="true"]{background:var(--fill)}
+.day[aria-selected="true"] .n{font-weight:700}
+.chips{display:flex;flex-direction:column;gap:2px;width:100%;padding:0 2px}
+.chip{
+  font-size:10.5px;line-height:1.35;border-radius:4px;padding:0 3px;
+  white-space:nowrap;overflow:hidden;text-overflow:clip;text-align:left;
+  color:#fff;font-weight:600;
+}
+.chip.exp{background:transparent;color:var(--soon);padding:0 1px}
+.more{font-size:10px;color:var(--l2);text-align:left;padding:0 3px}
+
+/* 선택한 날 */
+.sel{padding:18px 16px 0}
+.selhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.selhead h2{font-size:17px;margin:0}
+.selhead span{font-size:13px;color:var(--sun);font-weight:600;margin-left:6px}
+.selhead small{font-size:13px;color:var(--l2)}
+.evs{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.ev{
+  display:flex;align-items:stretch;gap:12px;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:12px 14px;
+  width:100%;text-align:left;
+}
+.ev .bar{width:4px;border-radius:2px;flex:none}
+.ev .t{font-size:13px;color:var(--l2);width:48px;flex:none;font-variant-numeric:tabular-nums;padding-top:1px}
+.ev .b{flex:1;min-width:0}
+.ev .b b{display:block;font-size:15.5px;font-weight:600;overflow-wrap:anywhere}
+.ev .b p{margin:2px 0 0;font-size:13px;color:var(--l2);white-space:pre-wrap;overflow-wrap:anywhere}
+.ev.ro{background:transparent}
+.empty{color:var(--l2);font-size:14.5px;padding:18px 0;text-align:center}
+
+/* 추가 버튼 */
+.fab{
+  position:fixed;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));
+  width:58px;height:58px;border-radius:50%;border:0;background:var(--brand);
+  box-shadow:0 6px 18px rgba(0,0,0,.18);display:grid;place-items:center;
+}
+.fab svg{width:28px;height:28px;fill:#fff}
+.fab:active{transform:scale(.95)}
+
+/* 시트 */
+.dim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.sheet{
+  width:100%;max-width:520px;max-height:92vh;overflow:auto;background:var(--card);
+  border-radius:18px 18px 0 0;padding:8px 16px calc(18px + env(safe-area-inset-bottom));
+}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px}
+.shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.shead h3{margin:0;font-size:17px}
+.txt{border:0;background:transparent;color:var(--brandD);font-weight:600;padding:6px 4px}
+.txt.cancel{color:var(--l2);font-weight:500}
+.field{display:block;margin-bottom:12px}
+.field>span{display:block;font-size:13px;color:var(--l2);margin-bottom:5px}
+.inp{
+  width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;
+  padding:10px 12px;min-width:0;
+}
+textarea.inp{resize:vertical;min-height:70px}
+.row{display:flex;gap:10px}
+.row>*{flex:1;min-width:0}
+.toggle{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:15px}
+.toggle input{width:20px;height:20px;accent-color:var(--brand)}
+.colors{display:flex;gap:10px;flex-wrap:wrap}
+.colors button{width:30px;height:30px;border-radius:50%;border:3px solid transparent}
+.colors button[aria-pressed="true"]{border-color:var(--l1)}
+.del{
+  width:100%;border:0;background:var(--fill);color:var(--sun);font-weight:600;
+  border-radius:12px;padding:12px;margin-top:6px;
+}
+
+/* 알림 */
+.toast{
+  position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  background:var(--l1);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;
+  z-index:20;max-width:calc(100% - 32px);
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1><button id="title" aria-label="오늘로 이동"></button></h1>
+  <div class="nav">
+    <button class="ib" id="prev" aria-label="이전 달"><svg viewBox="0 0 24 24"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg></button>
+    <button class="pill" id="goToday">오늘</button>
+    <button class="ib" id="next" aria-label="다음 달"><svg viewBox="0 0 24 24"><path d="M8.6 18.6 10 20l8-8-8-8-1.4 1.4 6.6 6.6z"/></svg></button>
+    <a class="pill" href="index.html" aria-label="냉장고 앱으로">냉장고</a>
+  </div>
+</header>
+
+<section class="cal" id="cal">
+  <div class="wk"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+  <div class="days" id="days" role="grid"></div>
+</section>
+
+<section class="sel">
+  <div class="selhead"><h2 id="selTitle"></h2><small id="selCount"></small></div>
+  <ul class="evs" id="evs"></ul>
+</section>
+
+<button class="fab" id="add" aria-label="일정 추가"><svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg></button>
+
+<div class="dim" id="dim" hidden>
+  <form class="sheet" id="form" autocomplete="off">
+    <div class="grab"></div>
+    <div class="shead">
+      <button type="button" class="txt cancel" id="cancel">취소</button>
+      <h3 id="formTitle">새 일정</h3>
+      <button type="submit" class="txt">저장</button>
+    </div>
+    <label class="field"><span>제목</span><input class="inp" id="fTitle" maxlength="80" required></label>
+    <div class="toggle"><span>하루 종일</span><input type="checkbox" id="fAll"></div>
+    <div class="row">
+      <label class="field"><span>시작</span><input class="inp" type="date" id="fDate" required></label>
+      <label class="field"><span>종료일</span><input class="inp" type="date" id="fEnd"></label>
+    </div>
+    <div class="row" id="timeRow">
+      <label class="field"><span>시작 시간</span><input class="inp" type="time" id="fStart"></label>
+      <label class="field"><span>종료 시간</span><input class="inp" type="time" id="fStop"></label>
+    </div>
+    <label class="field"><span>반복</span>
+      <select class="inp" id="fRepeat">
+        <option value="">반복 안 함</option>
+        <option value="d">매일</option>
+        <option value="w">매주</option>
+        <option value="m">매월</option>
+        <option value="y">매년</option>
+      </select>
+    </label>
+    <div class="field"><span>색상</span><div class="colors" id="fColors"></div></div>
+    <label class="field"><span>메모</span><textarea class="inp" id="fMemo" maxlength="500"></textarea></label>
+    <button type="button" class="del" id="del" hidden>일정 삭제</button>
+  </form>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY='calendar-events';
+const FRIDGE_KEY='fridge-items';
+const COLORS=['#22C55E','#3B82F6','#EF4444','#E8850C','#A855F7','#EC4899','#14B8A6','#78837D'];
+const WD=['일','월','화','수','목','금','토'];
+// 양력 공휴일 (음력 명절·대체공휴일은 해마다 달라 포함하지 않음)
+const HOLIDAYS={'0101':'신정','0301':'삼일절','0505':'어린이날','0606':'현충일','0815':'광복절','1003':'개천절','1009':'한글날','1225':'성탄절'};
+
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const dayDiff=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
+const todayIso=()=>iso(new Date());
+const newId=()=>Date.now()+''+Math.random().toString(36).slice(2,6);
+
+let events=[];
+let fridge=[];
+let view=new Date();view.setDate(1);
+let selected=todayIso();
+let editing=null;
+let color=COLORS[0];
+
+/* ---------- 저장 ---------- */
+function load(){
+  try{events=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(events))events=[]}catch(e){events=[]}
+  loadFridge();
+}
+function loadFridge(){
+  // 같은 주소의 냉장고 앱 재고에서 유통기한만 읽어 옴
+  try{
+    const raw=JSON.parse(localStorage.getItem(FRIDGE_KEY)||'[]');
+    fridge=Array.isArray(raw)?raw.filter(i=>i&&/^\d{8}$/.test(i.exp||'')).map(i=>({
+      name:i.name||'이름 없음',icon:i.icon||'',date:`${i.exp.slice(0,4)}-${i.exp.slice(4,6)}-${i.exp.slice(6,8)}`
+    })):[];
+  }catch(e){fridge=[]}
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(events))}
+  catch(e){toast('저장 공간이 부족합니다')}
+}
+
+/* ---------- 일정 계산 ---------- */
+// 해당 날짜에 걸리는지 (여러 날 일정·반복 포함)
+function occurs(ev,day){
+  const len=ev.end?Math.max(0,dayDiff(ev.date,ev.end)):0;
+  const from=dayDiff(ev.date,day);
+  if(from<0)return false;
+  if(!ev.repeat)return from<=len;
+  const s=parse(ev.date),d=parse(day);
+  // 반복이면 day에서 len일 이내 과거에 시작한 회차가 있는지 확인
+  for(let back=0;back<=len;back++){
+    const c=new Date(d);c.setDate(d.getDate()-back);
+    if(c<s)break;
+    if(ev.repeat==='d')return true;
+    if(ev.repeat==='w'&&c.getDay()===s.getDay())return true;
+    if(ev.repeat==='m'&&c.getDate()===s.getDate())return true;
+    if(ev.repeat==='y'&&c.getDate()===s.getDate()&&c.getMonth()===s.getMonth())return true;
+  }
+  return false;
+}
+function eventsOn(day){
+  return events.filter(e=>occurs(e,day)).sort((a,b)=>
+    (a.allDay===b.allDay?0:a.allDay?-1:1)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
+}
+const fridgeOn=day=>fridge.filter(f=>f.date===day);
+const holidayOf=day=>HOLIDAYS[day.slice(5,7)+day.slice(8,10)]||'';
+
+/* ---------- 그리기 ---------- */
+function render(){
+  const y=view.getFullYear(),m=view.getMonth();
+  $('title').textContent=`${y}년 ${m+1}월`;
+  const host=$('days');host.innerHTML='';
+  const start=new Date(y,m,1-new Date(y,m,1).getDay());
+  const weeks=Math.ceil((new Date(y,m,1).getDay()+new Date(y,m+1,0).getDate())/7);
+  const t=todayIso();
+  for(let i=0;i<weeks*7;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);
+    const key=iso(d);
+    const b=document.createElement('button');
+    b.className='day';b.type='button';
+    if(d.getMonth()!==m)b.classList.add('out');
+    if(d.getDay()===0)b.classList.add('sun');
+    if(d.getDay()===6)b.classList.add('sat');
+    if(holidayOf(key))b.classList.add('hol');
+    if(key===t)b.classList.add('today');
+    b.setAttribute('aria-selected',key===selected?'true':'false');
+    b.setAttribute('aria-label',`${d.getMonth()+1}월 ${d.getDate()}일`);
+    const n=document.createElement('span');n.className='n';n.textContent=d.getDate();b.appendChild(n);
+
+    const chips=document.createElement('div');chips.className='chips';
+    const evs=eventsOn(key),fr=fridgeOn(key);
+    const shown=evs.slice(0,2);
+    shown.forEach(e=>{
+      const c=document.createElement('span');c.className='chip';
+      c.style.background=e.color||COLORS[0];c.textContent=e.title;chips.appendChild(c);
+    });
+    if(fr.length&&shown.length<3){
+      const c=document.createElement('span');c.className='chip exp';
+      c.textContent=`${fr[0].icon||'🧊'}${fr.length>1?' '+fr.length:''}`;chips.appendChild(c);
+    }
+    const rest=evs.length-shown.length;
+    if(rest>0){const c=document.createElement('span');c.className='more';c.textContent=`+${rest}`;chips.appendChild(c)}
+    b.appendChild(chips);
+
+    b.onclick=()=>{
+      selected=key;
+      if(d.getMonth()!==m){view=new Date(d.getFullYear(),d.getMonth(),1)}
+      render();
+    };
+    host.appendChild(b);
+  }
+  renderSelected();
+}
+function renderSelected(){
+  const d=parse(selected);
+  const hol=holidayOf(selected);
+  $('selTitle').innerHTML='';
+  $('selTitle').append(`${d.getMonth()+1}월 ${d.getDate()}일 ${WD[d.getDay()]}요일`);
+  if(hol){const s=document.createElement('span');s.textContent=hol;$('selTitle').appendChild(s)}
+  const diff=dayDiff(todayIso(),selected);
+  $('selCount').textContent=diff===0?'오늘':diff>0?`${diff}일 후`:`${-diff}일 전`;
+
+  const list=$('evs');list.innerHTML='';
+  const evs=eventsOn(selected),fr=fridgeOn(selected);
+  evs.forEach(e=>{
+    const li=document.createElement('li');
+    const b=document.createElement('button');b.type='button';b.className='ev';
+    const bar=document.createElement('span');bar.className='bar';bar.style.background=e.color||COLORS[0];
+    const t=document.createElement('span');t.className='t';
+    t.textContent=e.allDay?'종일':(e.start||'')+(e.stop?`\n~${e.stop}`:'');
+    t.style.whiteSpace='pre-line';
+    const body=document.createElement('span');body.className='b';
+    const bt=document.createElement('b');bt.textContent=e.title;body.appendChild(bt);
+    const sub=[];
+    if(e.end&&e.end!==e.date)sub.push(`${fmt(e.date)} ~ ${fmt(e.end)}`);
+    if(e.repeat)sub.push({d:'매일',w:'매주',m:'매월',y:'매년'}[e.repeat]+' 반복');
+    if(e.memo)sub.push(e.memo);
+    if(sub.length){const p=document.createElement('p');p.textContent=sub.join('\n');body.appendChild(p)}
+    b.append(bar,t,body);
+    b.onclick=()=>openForm(e);
+    li.appendChild(b);list.appendChild(li);
+  });
+  fr.forEach(f=>{
+    const li=document.createElement('li');
+    const row=document.createElement('div');row.className='ev ro';
+    const bar=document.createElement('span');bar.className='bar';bar.style.background='var(--soon)';
+    const t=document.createElement('span');t.className='t';t.textContent='기한';
+    const body=document.createElement('span');body.className='b';
+    const bt=document.createElement('b');bt.textContent=`${f.icon} ${f.name}`.trim();
+    const p=document.createElement('p');p.textContent='냉장고 유통기한';
+    body.append(bt,p);row.append(bar,t,body);li.appendChild(row);list.appendChild(li);
+  });
+  if(!evs.length&&!fr.length){
+    const li=document.createElement('li');li.className='empty';li.textContent='일정이 없습니다';list.appendChild(li);
+  }
+}
+const fmt=s=>{const d=parse(s);return `${d.getMonth()+1}/${d.getDate()}`};
+
+/* ---------- 편집 시트 ---------- */
+function paintColors(){
+  const host=$('fColors');host.innerHTML='';
+  COLORS.forEach(c=>{
+    const b=document.createElement('button');b.type='button';b.style.background=c;
+    b.setAttribute('aria-label','색상 '+c);
+    b.setAttribute('aria-pressed',c===color?'true':'false');
+    b.onclick=()=>{color=c;paintColors()};
+    host.appendChild(b);
+  });
+}
+function syncTime(){ $('timeRow').hidden=$('fAll').checked }
+function openForm(ev){
+  editing=ev||null;
+  $('formTitle').textContent=ev?'일정 수정':'새 일정';
+  $('fTitle').value=ev?ev.title:'';
+  $('fAll').checked=ev?!!ev.allDay:false;
+  $('fDate').value=ev?ev.date:selected;
+  $('fEnd').value=ev&&ev.end?ev.end:'';
+  $('fStart').value=ev?ev.start||'':'09:00';
+  $('fStop').value=ev?ev.stop||'':'10:00';
+  $('fRepeat').value=ev?ev.repeat||'':'';
+  $('fMemo').value=ev?ev.memo||'':'';
+  color=ev?ev.color||COLORS[0]:COLORS[0];
+  $('del').hidden=!ev;
+  paintColors();syncTime();
+  $('dim').hidden=false;
+  setTimeout(()=>{ if(!ev)$('fTitle').focus() },50);
+}
+function closeForm(){ $('dim').hidden=true;editing=null }
+
+$('fAll').onchange=syncTime;
+$('cancel').onclick=closeForm;
+$('dim').onclick=e=>{ if(e.target===$('dim'))closeForm() };
+$('form').onsubmit=e=>{
+  e.preventDefault();
+  const title=$('fTitle').value.trim();
+  const date=$('fDate').value;
+  if(!title||!date)return;
+  let end=$('fEnd').value;
+  if(end&&end<date){toast('종료일이 시작일보다 빠릅니다');return}
+  if(end===date)end='';
+  const allDay=$('fAll').checked;
+  const start=allDay?'':$('fStart').value;
+  let stop=allDay?'':$('fStop').value;
+  if(!allDay&&!end&&start&&stop&&stop<start){toast('종료 시간이 시작 시간보다 빠릅니다');return}
+  const data={title,date,end,allDay,start,stop,repeat:$('fRepeat').value,color,memo:$('fMemo').value.trim()};
+  const was=!!editing;
+  if(editing)Object.assign(editing,data);
+  else events.push({id:newId(),...data});
+  save();
+  selected=date;view=new Date(parse(date).getFullYear(),parse(date).getMonth(),1);
+  closeForm();render();toast(was?'수정했습니다':'저장했습니다');
+};
+$('del').onclick=()=>{
+  if(!editing)return;
+  if(!confirm(`'${editing.title}' 일정을 삭제할까요?`))return;
+  events=events.filter(e=>e!==editing);
+  save();closeForm();render();toast('삭제했습니다');
+};
+
+/* ---------- 이동 ---------- */
+function shift(n){ view=new Date(view.getFullYear(),view.getMonth()+n,1);render() }
+function goToday(){ const t=new Date();view=new Date(t.getFullYear(),t.getMonth(),1);selected=todayIso();render() }
+$('prev').onclick=()=>shift(-1);
+$('next').onclick=()=>shift(1);
+$('goToday').onclick=goToday;
+$('title').onclick=goToday;
+$('add').onclick=()=>openForm(null);
+document.addEventListener('keydown',e=>{
+  if(!$('dim').hidden){ if(e.key==='Escape')closeForm(); return }
+  if(e.key==='ArrowLeft')shift(-1);
+  if(e.key==='ArrowRight')shift(1);
+});
+
+// 좌우로 밀어 달 넘기기
+let sx=null,sy=null;
+$('cal').addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+$('cal').addEventListener('touchend',e=>{
+  if(sx===null)return;
+  const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  sx=null;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)shift(dx<0?1:-1);
+},{passive:true});
+
+// 다른 탭(냉장고 앱)에서 바뀌면 다시 읽기
+window.addEventListener('storage',e=>{ if(e.key===KEY||e.key===FRIDGE_KEY){load();render()} });
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){loadFridge();render()} });
+
+let tt=null;
+function toast(msg){
+  const t=$('toast');t.textContent=msg;t.hidden=false;
+  clearTimeout(tt);tt=setTimeout(()=>{t.hidden=true},1800);
+}
+
+load();render();
+
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
