@@ -863,6 +863,17 @@ let log=[],recMonth=null,whyId=null,whyCount=1;
 let shop=[],menus=[],chatBusy=false;
 
 const $=id=>document.getElementById(id);
+/* 한 번에 하나만 — 탭을 누르면 열려 있던 창을 닫고 새 창을 연다 */
+const SHEETS=['sheet','rec','menu','shop','chat'];
+function closeOthers(keep){
+  SHEETS.forEach(id=>{
+    if(id===keep)return;
+    if($(id)&&$(id).classList.contains('on'))$(id).classList.remove('on');
+  });
+  if($('why').classList.contains('on')){$('whyBg').classList.remove('on');$('why').classList.remove('on');whyId=null}
+  if($('sortSheet').classList.contains('on')){$('sortBg').classList.remove('on');$('sortSheet').classList.remove('on')}
+  if($('quickSheet').classList.contains('on')){$('quickBg').classList.remove('on');$('quickSheet').classList.remove('on')}
+}
 let openedAt=0;                      // 창이 열린 시각
 const justOpened=()=>Date.now()-openedAt<350;
 const markOpen=()=>{openedAt=Date.now()};
@@ -1377,7 +1388,7 @@ function openSheet(it){
   pressOnly($('cats'),draft.cat?[...$('cats').children].find(x=>x.textContent.endsWith(draft.cat)):null);
   pressOnly($('icons'),draft.icon?[...$('icons').children].find(x=>x.textContent===draft.icon):null);
 
-  check();markOpen();
+  check();markOpen();closeOthers('sheet');
   $('scrim').classList.add('on');$('sheet').classList.add('on');syncHistory();
 }
 function closeSheet(){$('scrim').classList.remove('on');$('sheet').classList.remove('on');editing=null;syncHistory()}
@@ -1672,9 +1683,8 @@ function setTab(){
   ['tabHome','bShop','bMenu','bRec'].forEach(id=>$(id).setAttribute('aria-current',id===on?'true':'false'));
 }
 $('tabHome').onclick=()=>{
-  if($('shop').classList.contains('on'))closeShopSheet();
-  else if($('menu').classList.contains('on'))closeMenu();
-  else if($('rec').classList.contains('on'))closeRec();
+  const any=SHEETS.some(id=>$(id).classList.contains('on'));
+  if(any){closeOthers(null);$('scrim').classList.remove('on');showAlert();syncHistory()}
   else window.scrollTo({top:0,behavior:'smooth'});
 };
 
@@ -1767,7 +1777,7 @@ const ymLabel=ym=>`${ym.slice(0,4)}년 ${+ym.slice(4,6)}월`;
 function openRec(){
   recMonth=ymKey(new Date());
   renderRec();
-  markOpen();$('scrim').classList.add('on');$('rec').classList.add('on');syncHistory();
+  markOpen();closeOthers('rec');$('scrim').classList.add('on');$('rec').classList.add('on');syncHistory();
 
 }
 function closeRec(){$('rec').classList.remove('on');$('scrim').classList.remove('on');showAlert();syncHistory()}
@@ -1957,7 +1967,7 @@ function addShop(name){
 
 /* 오늘 메뉴 */
 function openMenu(){
-  markOpen();$('scrim').classList.add('on');$('menu').classList.add('on');syncHistory();
+  markOpen();closeOthers('menu');$('scrim').classList.add('on');$('menu').classList.add('on');syncHistory();
 
   if(!menus.length)askMenu();else drawMenus();
 }
@@ -2051,7 +2061,7 @@ function eatBatch(names){
 
 /* 장보기 */
 function openShopSheet(){
-  markOpen();$('scrim').classList.add('on');$('shop').classList.add('on');
+  markOpen();closeOthers('shop');$('scrim').classList.add('on');$('shop').classList.add('on');
 
   $('shopQ').value='';$('shopFind').innerHTML='';
   renderShop();syncHistory();
@@ -2145,7 +2155,7 @@ function renderShop(){
 
 /* ---------- AI 대화창 ---------- */
 function openChat(){
-  markOpen();$('scrim').classList.add('on');$('chat').classList.add('on');syncHistory();
+  markOpen();closeOthers('chat');$('scrim').classList.add('on');$('chat').classList.add('on');syncHistory();
 
   if(!$('chatLog').children.length)chatSay('ai','유통기한을 말로 알려주거나, 택배 문자나 주문 내역을 그대로 붙여넣어 주세요.\n예) 우유 9월 30일까지, 삼겹살 600g 냉동');
   setTimeout(()=>$('chatInput').focus(),300);
