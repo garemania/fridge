@@ -16,6 +16,7 @@
   --fill:rgba(120,131,125,.1);
   --brand:#22C55E; --brandD:#16A34A;
   --soon:#E8850C; --gone:#EF4444; --sheetbg:#F7F8F7;
+  --tabh:64px;            /* 아래 탭 실제 높이 — 화면이 열릴 때 다시 잰다 */
 }
 @media (prefers-color-scheme:dark){
   :root{
@@ -27,12 +28,13 @@
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overscroll-behavior-y:none}
+html{height:100%}
+body{margin:0;min-height:100%;overscroll-behavior-y:none}   /* height:100%면 아래 여백이 스크롤에 안 잡혀 잘린다 */
 body{
   background:var(--bg);color:var(--l1);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Apple SD Gothic Neo",system-ui,"Noto Sans KR",sans-serif;
   font-size:16px;line-height:1.4;letter-spacing:-.015em;
-  padding-bottom:calc(130px + env(safe-area-inset-bottom));
+  padding-bottom:calc(var(--tabh) + 96px);   /* 탭·+버튼에 가리지 않게 */
 }
 button,input,select{font-family:inherit;color:inherit}
 input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
@@ -188,7 +190,7 @@ body.rows .eatbg{font-size:13px;padding-left:14px}
 
 /* 추가 버튼 */
 .fab{
-  position:fixed;right:18px;bottom:calc(76px + env(safe-area-inset-bottom));
+  position:fixed;right:18px;bottom:calc(var(--tabh) + 16px);
   width:58px;height:58px;border-radius:50%;border:0;background:var(--brand);color:#fff;
   font-size:31px;font-weight:300;line-height:1;cursor:pointer;z-index:4;
   box-shadow:0 8px 22px rgba(34,197,94,.42);
@@ -218,7 +220,7 @@ body.rows .eatbg{font-size:13px;padding-left:14px}
 .nav button{border:0;background:transparent;font-size:16px;color:var(--brandD);padding:0;cursor:pointer}
 .nav button.done{font-weight:700}
 .nav button:disabled{color:var(--l3)}
-.body{padding:18px 16px calc(104px + env(safe-area-inset-bottom))}
+.body{padding:18px 16px calc(var(--tabh) + 56px)}
 
 /* 촬영 화면 */
 .cap{
@@ -288,7 +290,7 @@ body.rows .eatbg{font-size:13px;padding-left:14px}
 .danger{width:100%;border:1px solid var(--line);background:var(--card);color:var(--gone);border-radius:11px;padding:14px;font-size:16px;cursor:pointer}
 
 .toast{
-  position:fixed;left:16px;right:16px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:11;
+  position:fixed;left:16px;right:16px;bottom:calc(var(--tabh) + 24px);z-index:11;
   background:rgba(20,26,22,.96);color:#fff;border-radius:13px;padding:13px 16px;font-size:14.5px;
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   opacity:0;transform:translateY(10px);pointer-events:none;transition:.24s;
@@ -350,7 +352,7 @@ body.rows .eatbg{font-size:13px;padding-left:14px}
 .drow .du{font-size:14px;color:var(--l2);width:14px}
 
 /* AI 대화창 */
-#chat{overflow:hidden;bottom:calc(57px + env(safe-area-inset-bottom))}   /* 아래 탭에 가리지 않게 */
+#chat{overflow:hidden;bottom:var(--tabh)}   /* 아래 탭에 가리지 않게 */
 .chatbody{display:flex;flex-direction:column;height:100%}
 .chatlog{flex:1;overflow-y:auto;padding:16px 16px 8px;display:flex;flex-direction:column;gap:9px}
 .bub{max-width:84%;padding:10px 13px;border-radius:15px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
@@ -370,7 +372,7 @@ body.rows .eatbg{font-size:13px;padding-left:14px}
 }
 .chatbar button{flex:0 0 auto;border:0;background:var(--brand);color:#fff;font-weight:700;border-radius:12px;padding:0 17px;font-size:15px;cursor:pointer}
 .chatbar button:disabled{background:var(--fill);color:var(--l3)}
-#chat.on ~ .toast{bottom:calc(140px + env(safe-area-inset-bottom))}   /* 입력칸을 가리지 않게 */
+#chat.on ~ .toast{bottom:calc(var(--tabh) + 82px)}   /* 입력칸을 가리지 않게 */
 
 /* 드래그로 보관위치 옮기기 */
 .ghost{
@@ -382,7 +384,7 @@ body.rows .eatbg{font-size:13px;padding-left:14px}
 body.dragging{overflow:hidden;touch-action:none}
 body.dragging .tile{touch-action:none}
 .dropbar{
-  position:fixed;left:12px;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:12;
+  position:fixed;left:12px;right:12px;bottom:calc(var(--tabh) + 14px);z-index:12;
   display:none;flex-direction:column;gap:8px;
 }
 .dropbar.on{display:flex;animation:rise .18s ease both}
@@ -532,7 +534,7 @@ body.dragging .tile{touch-action:none}
   <div class="dropzone out" data-p="__out">🗑 꺼내기</div>
 </div>
 
-<nav class="tabs" role="tablist">
+<nav class="tabs" role="tablist" id="tabs">
   <button class="tab" id="tabHome" aria-current="true">
     <svg viewBox="0 0 24 24"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v6h12V4H6zm0 8v8h12v-8H6zm1.6-6.4h1.6v3H7.6v-3zm0 7.4h1.6v3H7.6v-3z"/></svg>
     <span>냉장고</span>
@@ -1484,6 +1486,9 @@ function shrink(file,maxPx){
 
 /* ---------- 인식 ---------- */
 const CATLIST=CATS.map(c=>c.k).join(', ');
+const DATERULE='사진에 날짜가 같이 보이면 exp에 YYYYMMDD 8자리로 담아줘. '+
+  '유통기한·소비기한·품질유지기한만 넣고, 제조일자만 보이면 빈 문자열. 두 자리 연도는 20xx. '+
+  'expKind에는 유통기한·소비기한·품질유지기한·제조일자·없음 중 하나. ';
 const CATRULE='종류(cat)는 반드시 다음 중 하나: '+CATLIST+'. '+
   '껌·사탕·과자·초콜릿·젤리·견과 간식은 과자·간식, 라면·통조림·즉석밥·레토르트·즉석식품은 가공식품. '+
   '딱 맞는 게 없거나 애매하면 억지로 고르지 말고 기타. ';
@@ -1495,7 +1500,7 @@ const P={
     '둘 다 아니면 {"type":"none"}.',
   item:'이 사진 속 식품이 무엇인지 알려줘. 포장에 제품명이 있으면 그 이름을, 없으면 생김새로 추정한 한국어 이름을 써줘. '+
     'JSON 객체 하나만 출력해. 설명도 마크다운도 붙이지 마. '+
-    CATRULE+'{"name":"12자 이내","cat":"종류","icon":"이모지 한 글자","days":냉장 보관 가능 일수 정수,"sure":0~1 소수} '+
+    CATRULE+DATERULE+'{"name":"12자 이내","cat":"종류","exp":"YYYYMMDD 또는 빈 문자열","expKind":"유통기한|제조일자|없음","icon":"이모지 한 글자","days":냉장 보관 가능 일수 정수,"sure":0~1 소수} '+
     '식품이 아니면 name을 빈 문자열로.',
   date:'이 사진에서 날짜를 읽어줘. 식품 포장의 유통기한, 소비기한, 품질유지기한을 찾는 게 목적이야. '+
     '제조일자와 유통기한이 둘 다 있으면 반드시 유통기한(또는 소비기한) 쪽을 골라. '+
@@ -1594,11 +1599,26 @@ function applyItem(j,opts){
   // 종류를 알면 종류 기본일수, 기타일 때만 AI 추정일수
   if(draft.cat===ETC.k&&!custom[ETC.k]&&Number.isInteger(j.days)&&j.days>0&&(redo||!$('exp').value))$('exp').value=plus(j.days);
   if(keepExp)$('exp').value=keepExp;
+
+  /* 사진에 유통기한까지 보였으면 한 번에 채운다 (제조일자는 쓰지 않는다) */
+  let gotDate=false;
+  const ex=String(j.exp||'').replace(/\D/g,'');
+  const kindOk=!j.expKind||/유통|소비|품질/.test(j.expKind);
+  if(ex.length===8&&kindOk&&left(ex)!==null&&left(ex)>-370&&left(ex)<2000&&!keepExp){
+    $('exp').value=ex;$('expHint').textContent='사진에서 읽은 날짜입니다. 다르면 고쳐주세요';
+    gotDate=true;
+  }
   check();
   const nm=opts.barcodeName||j.name;
   const low=!opts.barcodeName&&j.sure!==undefined&&j.sure<0.6;
-  s.textContent=(low?`${nm} 같습니다. 확인해주세요`:`${nm} · ${draft.cat||c.k}`)+' → 이제 유통기한을 찍어주세요';
-  $('bDate').classList.add('hl');
+  const head=low?`${nm} 같습니다. 확인해주세요`:`${nm} · ${draft.cat||c.k}`;
+  if(gotDate){
+    s.textContent=`${head} · 유통기한 ${pretty($('exp').value)}까지 — 한 번에 읽었습니다`;
+    $('bDate').classList.remove('hl');
+  }else{
+    s.textContent=head+' → 이제 유통기한을 찍어주세요';
+    $('bDate').classList.add('hl');
+  }
 }
 
 async function readDate(url){
@@ -2315,6 +2335,17 @@ function syncHistory(){
     else if(!open&&guarded){guarded=false;skipPop=true;history.back()}
   },0);
 }
+/* 아래 탭 높이를 실제로 재서 여백에 반영 (기종·안전영역마다 달라서 고정값이면 잘린다) */
+function fitBottom(){
+  const h=Math.round($('tabs').getBoundingClientRect().height)||64;
+  document.documentElement.style.setProperty('--tabh',h+'px');
+}
+fitBottom();
+window.addEventListener('resize',fitBottom);
+window.addEventListener('orientationchange',()=>setTimeout(fitBottom,300));
+if(window.visualViewport)window.visualViewport.addEventListener('resize',fitBottom);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)fitBottom()});
+
 // 스크롤하면 도구 줄에 그림자
 let lastY=0;
 window.addEventListener('scroll',()=>{
