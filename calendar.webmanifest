@@ -1,0 +1,17 @@
+{
+  "name": "캘린더",
+  "short_name": "캘린더",
+  "description": "일정 관리와 냉장고 유통기한을 한눈에 보는 캘린더",
+  "id": "./calendar.html",
+  "start_url": "./calendar.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F8F7",
+  "theme_color": "#16211C",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
